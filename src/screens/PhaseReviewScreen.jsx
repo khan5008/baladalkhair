@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import logo from '../assets/logo new.png';
 
-const PhaseReviewScreen = ({ phaseData, onBack, onNavigate, language, onLanguageChange }) => {
+const PhaseReviewScreen = ({ phaseData, onBack, onNavigate, onLogout, language, onLanguageChange }) => {
   const [comment, setComment] = useState('');
   const [activeMenu, setActiveMenu] = useState('phaseReview');
   const [expandedMenus, setExpandedMenus] = useState({
@@ -165,7 +165,7 @@ const PhaseReviewScreen = ({ phaseData, onBack, onNavigate, language, onLanguage
                         setActiveMenu(subItem.id);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
-                            onNavigate('finance');
+                            onNavigate('third-party-finance');
                           } else if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
                           } else if (subItem.id === 'send-message') {
@@ -214,15 +214,28 @@ const PhaseReviewScreen = ({ phaseData, onBack, onNavigate, language, onLanguage
               </h1>
             </div>
           </div>
-          <button 
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+            </button>
+            {onLogout && (
+              <button 
+                onClick={onLogout}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+              </button>
+            )}
+          </div>
         </header>
 
         {/* Scrollable Content */}

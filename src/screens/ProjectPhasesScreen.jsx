@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import logo from '../assets/logo new.png';
 
-const ProjectPhasesScreen = ({ onBack, onNavigate, language, onLanguageChange }) => {
+const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChange }) => {
   const [activeMenu, setActiveMenu] = useState('projectPhases');
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [activeTab, setActiveTab] = useState('calendar');
   const [selectedProject, setSelectedProject] = useState('');
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
@@ -134,7 +135,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, language, onLanguageChange })
                         setActiveMenu(subItem.id);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
-                            onNavigate('finance');
+                            onNavigate('third-party-finance');
                           } else if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
                           } else if (subItem.id === 'send-message') {
@@ -185,15 +186,28 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, language, onLanguageChange })
                 </h1>
               </div>
             </div>
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-            </button>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+              </button>
+              {onLogout && (
+                <button 
+                  onClick={onLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -290,35 +304,61 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, language, onLanguageChange })
           </div>
         </div>
 
-        {/* Kanban Tabs */}
-        <div className="bg-white border-b border-gray-200 px-6">
-          <div className="flex gap-6">
-            <button className="px-4 py-3 text-[#67AF31] border-b-2 border-[#67AF31] font-semibold">
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-              {isRTL ? 'كانبان' : 'Kanban'}
-            </button>
-            <button className="px-4 py-3 text-gray-600 hover:text-gray-800 font-medium">
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Tabs Navigation */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="flex gap-1 px-6">
+            <button 
+              onClick={() => setActiveTab('calendar')}
+              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+                activeTab === 'calendar'
+                  ? 'text-gray-800 border-b-2 border-gray-800'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {isRTL ? 'التقويم' : 'Calendar'}
             </button>
-            <button className="px-4 py-3 text-gray-600 hover:text-gray-800 font-medium">
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => setActiveTab('gantt')}
+              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+                activeTab === 'gantt'
+                  ? 'text-gray-800 border-b-2 border-gray-800'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               {isRTL ? 'جانت' : 'Gantt'}
             </button>
-            <button className="px-4 py-3 text-gray-600 hover:text-gray-800 font-medium">
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => setActiveTab('forms')}
+              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+                activeTab === 'forms'
+                  ? 'text-gray-800 border-b-2 border-gray-800'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               {isRTL ? 'النماذج' : 'Forms'}
             </button>
-            <button className="px-4 py-3 text-gray-600 hover:text-gray-800 font-medium">
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => setActiveTab('projectStory')}
+              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+                activeTab === 'projectStory'
+                  ? 'text-gray-800 border-b-2 border-gray-800'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               {isRTL ? 'قصة المشروع' : 'Project Story'}
@@ -326,91 +366,287 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, language, onLanguageChange })
           </div>
         </div>
 
-        {/* Add Task Section */}
-        <div className="bg-white border-b border-gray-200 p-6">
-          <h3 
-            className="text-lg font-semibold text-gray-800 mb-4"
-            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-          >
-            {isRTL ? 'إضافة مهمة' : 'Add Task'}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <input
-              type="text"
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-              placeholder={isRTL ? "عنوان المهمة" : "Task Title"}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-            />
-            <input
-              type="text"
-              value={taskDescription}
-              onChange={(e) => setTaskDescription(e.target.value)}
-              placeholder={isRTL ? "وصف المهمة" : "Task Description"}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-            />
-            <select
-              value={selectedBacklog}
-              onChange={(e) => setSelectedBacklog(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-            >
-              <option value="Backlog">{isRTL ? 'المهام المعلقة' : 'Backlog'}</option>
-              <option value="In Progress">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</option>
-              <option value="Under Review">{isRTL ? 'قيد المراجعة' : 'Under Review'}</option>
-              <option value="Blocked">{isRTL ? 'محظور' : 'Blocked'}</option>
-            </select>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none"
-            />
-            <button 
-              className="px-4 py-2 bg-[#67AF31] text-white rounded-lg hover:bg-[#5a9629] transition-colors font-semibold"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-            >
-              {isRTL ? 'إضافة مهمة' : 'Add Task'}
-            </button>
-          </div>
-        </div>
-
-        {/* Kanban Board */}
-        <div className="flex-1 overflow-x-auto bg-gray-50 p-6">
-          <div className="flex gap-6 min-w-max">
-            {kanbanColumns.map((column) => (
-              <div key={column.id} className="w-80 bg-white rounded-xl shadow-lg border border-gray-200">
-                <div className={`p-4 rounded-t-xl ${column.color} border-b border-gray-200`}>
-                  <div className="flex items-center justify-between">
-                    <h3 
-                      className="font-semibold text-gray-800"
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
-                    >
-                      {isRTL ? column.titleAr : column.title}
-                    </h3>
-                    <span className="bg-white text-gray-600 px-2 py-1 rounded-full text-sm font-medium">
-                      {column.count}
-                    </span>
-                  </div>
+        {/* Tab Content */}
+        <div className="flex-1 overflow-y-auto bg-gray-50">
+          {activeTab === 'calendar' && (
+            <div className="p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <h3 
+                  className="text-gray-800 font-bold mb-6"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                >
+                  {isRTL ? 'تقويم المشروع' : 'Project Calendar'}
+                </h3>
+                {/* Calendar View */}
+                <div className="grid grid-cols-7 gap-2 mb-4">
+                  {/* Calendar Header */}
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                    <div key={idx} className="text-center text-sm font-semibold text-gray-600 py-2">
+                      {isRTL ? ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'][idx] : day}
+                    </div>
+                  ))}
+                  {/* Calendar Days */}
+                  {Array.from({ length: 35 }).map((_, idx) => {
+                    const day = idx - 5; // Start from day 1
+                    const isCurrentMonth = day > 0 && day <= 31;
+                    const isToday = day === new Date().getDate();
+                    return (
+                      <div
+                        key={idx}
+                        className={`aspect-square rounded-lg border-2 flex flex-col items-center justify-center p-2 ${
+                          isCurrentMonth
+                            ? isToday
+                              ? 'bg-[#67AF31] text-white border-[#67AF31]'
+                              : 'bg-white border-gray-200 hover:border-[#67AF31] hover:bg-gray-50'
+                            : 'bg-gray-50 border-gray-100 text-gray-400'
+                        }`}
+                      >
+                        {isCurrentMonth && (
+                          <span className="text-sm font-medium">{day}</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="p-4 min-h-[400px]">
-                  <div className="text-center text-gray-500 mt-20">
-                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <p 
-                      className="text-sm"
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
-                    >
-                      {isRTL ? 'لا توجد مهام' : 'No tasks'}
-                    </p>
+                {/* Calendar Events */}
+                <div className="mt-6 space-y-3">
+                  <h4 
+                    className="text-gray-700 font-semibold mb-3"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                  >
+                    {isRTL ? 'الأحداث القادمة' : 'Upcoming Events'}
+                  </h4>
+                  {[
+                    { date: '15', title: 'Phase Review Meeting', titleAr: 'اجتماع مراجعة المرحلة', time: '10:00 AM' },
+                    { date: '18', title: 'Project Milestone', titleAr: 'معلم المشروع', time: '2:00 PM' },
+                    { date: '22', title: 'Stakeholder Presentation', titleAr: 'عرض لأصحاب المصلحة', time: '11:00 AM' },
+                  ].map((event, idx) => (
+                    <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center text-white font-bold">
+                        {event.date}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-800 font-medium">{isRTL ? event.titleAr : event.title}</p>
+                        <p className="text-gray-500 text-sm">{event.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'gantt' && (
+            <div className="p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <h3 
+                  className="text-gray-800 font-bold mb-6"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                >
+                  {isRTL ? 'مخطط جانت' : 'Gantt Chart'}
+                </h3>
+                {/* Gantt Chart */}
+                <div className="space-y-4">
+                  {[
+                    { name: 'Phase 1: Initiation', nameAr: 'المرحلة 1: البدء', progress: 100, start: 'Week 1', end: 'Week 4', color: 'bg-green-500' },
+                    { name: 'Phase 2: Planning', nameAr: 'المرحلة 2: التخطيط', progress: 75, start: 'Week 3', end: 'Week 8', color: 'bg-blue-500' },
+                    { name: 'Phase 3: Execution', nameAr: 'المرحلة 3: التنفيذ', progress: 45, start: 'Week 7', end: 'Week 16', color: 'bg-yellow-500' },
+                    { name: 'Phase 4: Monitoring', nameAr: 'المرحلة 4: المراقبة', progress: 20, start: 'Week 15', end: 'Week 20', color: 'bg-orange-500' },
+                    { name: 'Phase 5: Closure', nameAr: 'المرحلة 5: الإغلاق', progress: 0, start: 'Week 19', end: 'Week 24', color: 'bg-gray-400' },
+                  ].map((phase, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 font-medium text-sm">{isRTL ? phase.nameAr : phase.name}</span>
+                        <span className="text-gray-500 text-xs">{phase.start} - {phase.end}</span>
+                      </div>
+                      <div className="relative h-8 bg-gray-200 rounded-lg overflow-hidden">
+                        <div
+                          className={`h-full ${phase.color} rounded-lg transition-all duration-300 flex items-center justify-end pr-2`}
+                          style={{ width: `${phase.progress}%` }}
+                        >
+                          {phase.progress > 10 && (
+                            <span className="text-white text-xs font-semibold">{phase.progress}%</span>
+                          )}
+                        </div>
+                        {phase.progress <= 10 && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-semibold">{phase.progress}%</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Timeline Legend */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex items-center gap-6 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-500 rounded"></div>
+                      <span className="text-sm text-gray-600">{isRTL ? 'مكتمل' : 'Completed'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                      <span className="text-sm text-gray-600">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                      <span className="text-sm text-gray-600">{isRTL ? 'مخطط' : 'Planned'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-400 rounded"></div>
+                      <span className="text-sm text-gray-600">{isRTL ? 'لم يبدأ' : 'Not Started'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {activeTab === 'forms' && (
+            <div className="p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 
+                    className="text-gray-800 font-bold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                  >
+                    {isRTL ? 'النماذج' : 'Forms'}
+                  </h3>
+                  <button className="px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+                    {isRTL ? '+ إضافة نموذج' : '+ Add Form'}
+                  </button>
+                </div>
+                {/* Forms Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[
+                    { name: 'Progress Report Form', nameAr: 'نموذج تقرير التقدم', icon: '📄', submissions: 12, lastUpdated: '2 days ago', lastUpdatedAr: 'منذ يومين' },
+                    { name: 'Site Visit Form', nameAr: 'نموذج زيارة الموقع', icon: '🏗️', submissions: 8, lastUpdated: '1 week ago', lastUpdatedAr: 'منذ أسبوع' },
+                    { name: 'Expense Report Form', nameAr: 'نموذج تقرير المصروفات', icon: '💰', submissions: 24, lastUpdated: '3 days ago', lastUpdatedAr: 'منذ 3 أيام' },
+                    { name: 'Quality Check Form', nameAr: 'نموذج فحص الجودة', icon: '✅', submissions: 15, lastUpdated: '5 days ago', lastUpdatedAr: 'منذ 5 أيام' },
+                    { name: 'Safety Inspection Form', nameAr: 'نموذج فحص السلامة', icon: '🛡️', submissions: 6, lastUpdated: '1 week ago', lastUpdatedAr: 'منذ أسبوع' },
+                    { name: 'Completion Certificate', nameAr: 'شهادة الإنجاز', icon: '🎓', submissions: 3, lastUpdated: '2 weeks ago', lastUpdatedAr: 'منذ أسبوعين' },
+                  ].map((form, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-xl p-5 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+                      <div className="flex items-start gap-4">
+                        <div className="text-4xl">{form.icon}</div>
+                        <div className="flex-1">
+                          <h4 
+                            className="text-gray-800 font-semibold mb-2"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                          >
+                            {isRTL ? form.nameAr : form.name}
+                          </h4>
+                          <div className="flex items-center justify-between text-sm text-gray-600">
+                            <span>{isRTL ? `${form.submissions} تقديم` : `${form.submissions} submissions`}</span>
+                            <span>{isRTL ? form.lastUpdatedAr : form.lastUpdated}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'projectStory' && (
+            <div className="p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 
+                    className="text-gray-800 font-bold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                  >
+                    {isRTL ? 'قصة المشروع' : 'Project Story'}
+                  </h3>
+                  <button className="px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+                    {isRTL ? '+ إضافة قصة' : '+ Add Story'}
+                  </button>
+                </div>
+                {/* Project Story Timeline */}
+                <div className="space-y-6">
+                  {[
+                    {
+                      date: 'January 15, 2025',
+                      dateAr: '15 يناير 2025',
+                      title: 'Project Initiation',
+                      titleAr: 'بدء المشروع',
+                      description: 'The project was officially initiated with stakeholder approval and budget allocation.',
+                      descriptionAr: 'تم بدء المشروع رسمياً بموافقة أصحاب المصلحة وتخصيص الميزانية.',
+                      author: 'Ahmed Mohammed',
+                      authorAr: 'أحمد محمد',
+                      type: 'milestone'
+                    },
+                    {
+                      date: 'February 1, 2025',
+                      dateAr: '1 فبراير 2025',
+                      title: 'First Phase Completion',
+                      titleAr: 'إكمال المرحلة الأولى',
+                      description: 'Successfully completed the initiation phase ahead of schedule. All deliverables met quality standards.',
+                      descriptionAr: 'تم إكمال مرحلة البدء بنجاح قبل الموعد المحدد. جميع المخرجات تلبي معايير الجودة.',
+                      author: 'Sara Ahmed',
+                      authorAr: 'سارة أحمد',
+                      type: 'achievement'
+                    },
+                    {
+                      date: 'February 20, 2025',
+                      dateAr: '20 فبراير 2025',
+                      title: 'Site Visit Completed',
+                      titleAr: 'اكتملت زيارة الموقع',
+                      description: 'Conducted comprehensive site visit to assess progress and identify any challenges.',
+                      descriptionAr: 'تم إجراء زيارة شاملة للموقع لتقييم التقدم وتحديد أي تحديات.',
+                      author: 'Mohammed Ali',
+                      authorAr: 'محمد علي',
+                      type: 'update'
+                    },
+                  ].map((story, idx) => (
+                    <div key={idx} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                          {idx + 1}
+                        </div>
+                        {idx < 2 && (
+                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-6">
+                        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm text-gray-500">{isRTL ? story.dateAr : story.date}</span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              story.type === 'milestone' ? 'bg-blue-100 text-blue-700' :
+                              story.type === 'achievement' ? 'bg-green-100 text-green-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {story.type === 'milestone' ? (isRTL ? 'معلم' : 'Milestone') :
+                               story.type === 'achievement' ? (isRTL ? 'إنجاز' : 'Achievement') :
+                               (isRTL ? 'تحديث' : 'Update')}
+                            </span>
+                          </div>
+                          <h4 
+                            className="text-gray-800 font-bold mb-2"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px' }}
+                          >
+                            {isRTL ? story.titleAr : story.title}
+                          </h4>
+                          <p 
+                            className="text-gray-600 mb-3"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                          >
+                            {isRTL ? story.descriptionAr : story.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>{isRTL ? story.authorAr : story.author}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

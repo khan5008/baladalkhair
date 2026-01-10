@@ -1,8 +1,24 @@
 import { useState } from 'react';
 import logo from '../assets/logo new.png';
 
-const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChange }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChange, selectedOrg: propSelectedOrg, currentStep: propCurrentStep, onStateChange }) => {
+  // Initialize step: if propCurrentStep provided use it, else if selectedOrg exists use step 2, else step 1
+  const initialStep = propCurrentStep || (propSelectedOrg ? 2 : 1);
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [selectedOrg, setSelectedOrg] = useState(propSelectedOrg || null);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+
+  // Update parent state when local state changes
+  const updateState = (updates) => {
+    const newState = {
+      selectedOrg: updates.selectedOrg !== undefined ? updates.selectedOrg : selectedOrg,
+      currentStep: updates.currentStep !== undefined ? updates.currentStep : currentStep,
+      selectedProjects: updates.selectedProjects !== undefined ? updates.selectedProjects : selectedProjects
+    };
+    if (onStateChange) {
+      onStateChange(newState);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [perPage, setPerPage] = useState(10);
@@ -69,6 +85,59 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
     { id: 2, label: 'Projects', labelAr: 'المشاريع' },
     { id: 3, label: 'Review', labelAr: 'المراجعة' },
   ];
+
+  // Sample projects data
+  const projects = [
+    {
+      id: 1,
+      name: 'مشروع توزيع السلة الرمضانية في مسجد مطلق سند المطيري وزوجته طمشه المطيري ( رحمهم الله ) 8097',
+      nameEn: 'Ramadan Basket Distribution Project at Mutlaq Sanad Al-Mutairi Mosque and his wife Tamasha Al-Mutairi (may God have mercy on them) 8097',
+      code: '',
+      amount: 700,
+      currency: 'KWD'
+    },
+    {
+      id: 2,
+      name: 'مشروع حفر بئر باسم / نوره فالح عبيد العجمي',
+      nameEn: 'Well Digging Project in the name of / Noura Faleh Obaid Al-Ajmi',
+      code: '200216',
+      amount: 525,
+      currency: 'KWD'
+    }
+  ];
+
+  const handleOrgSelect = (org) => {
+    setSelectedOrg(org);
+    const newStep = 2;
+    setCurrentStep(newStep);
+    updateState({ selectedOrg: org, currentStep: newStep });
+  };
+
+  const handleBackClick = () => {
+    if (currentStep > 1) {
+      const newStep = currentStep - 1;
+      setCurrentStep(newStep);
+      if (currentStep === 2) {
+        setSelectedOrg(null);
+        setSelectedProjects([]);
+        updateState({ selectedOrg: null, currentStep: newStep, selectedProjects: [] });
+      } else {
+        updateState({ currentStep: newStep });
+      }
+    } else {
+      onBack();
+    }
+  };
+
+  const toggleProject = (projectId) => {
+    setSelectedProjects(prev => {
+      const newProjects = prev.includes(projectId)
+        ? prev.filter(id => id !== projectId)
+        : [...prev, projectId];
+      updateState({ selectedProjects: newProjects });
+      return newProjects;
+    });
+  };
 
   const totalPages = Math.ceil(organizations.length / perPage);
   const startIndex = (currentPage - 1) * perPage;
@@ -152,7 +221,8 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
                         setActiveMenu(subItem.id);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
-                            // Already on finance screen
+                            // Already on third-party-finance screen
+                            onNavigate('third-party-finance');
                           } else if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
                           } else if (subItem.id === 'send-message') {
@@ -189,7 +259,7 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
         {/* Top Header */}
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <button onClick={handleBackClick} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -216,6 +286,17 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
               </svg>
               <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
             </button>
+            {onLogout && (
+              <button 
+                onClick={onLogout}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+              </button>
+            )}
             <button className="px-6 py-2.5 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
               {isRTL ? 'إنشاء سند' : 'Create Challan'}
             </button>
@@ -257,23 +338,26 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
           <div className="max-w-7xl mx-auto">
-            {/* Section Title */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h2 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
-              >
-                {isRTL ? 'اختر المنظمة' : 'Select Organization'}
-              </h2>
-            </div>
+            {currentStep === 1 ? (
+              <>
+                {/* Section Title */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <h2 
+                    className="text-gray-800 font-bold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                  >
+                    {isRTL ? 'اختر المنظمة' : 'Select Organization'}
+                  </h2>
+                </div>
 
-            {/* Search and Filter Bar */}
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-6">
+                {/* Search and Filter Bar */}
+
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-6">
               <div className="flex flex-wrap items-center gap-4">
                 {/* Search Input */}
                 <div className="flex-1 min-w-[250px]">
@@ -353,13 +437,13 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
               </div>
             </div>
 
-            {/* Organization Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                {/* Organization Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {displayedOrgs.map((org) => (
                 <div
                   key={org.id}
                   className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => handleOrgSelect(org)}
                 >
                   <div className="flex items-start gap-4">
                     <div 
@@ -406,39 +490,121 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, language, onLanguageChang
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-center gap-4 mt-6">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-xl transition-all duration-200 ${
-                  currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
-                }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 500 }}
-              >
-                {isRTL ? 'السابق' : 'Prev'}
-              </button>
-              <span 
-                className="text-gray-700 font-medium"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
-              >
-                {isRTL ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
-              </span>
-              <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-xl transition-all duration-200 ${
-                  currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
-                }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 500 }}
-              >
-                {isRTL ? 'التالي' : 'Next'}
-              </button>
-            </div>
+                {/* Pagination */}
+                <div className="flex items-center justify-center gap-4 mt-6">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${
+                      currentPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
+                    }`}
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 500 }}
+                  >
+                    {isRTL ? 'السابق' : 'Prev'}
+                  </button>
+                  <span 
+                    className="text-gray-700 font-medium"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                  >
+                    {isRTL ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${
+                      currentPage === totalPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
+                    }`}
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 500 }}
+                  >
+                    {isRTL ? 'التالي' : 'Next'}
+                  </button>
+                </div>
+              </>
+            ) : currentStep === 2 && selectedOrg ? (
+              <>
+                {/* Selected Organization Card */}
+                <div className="bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-xl shadow-lg p-6 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-[#67AF31] font-bold text-2xl shadow-md">
+                        {selectedOrg.icon || (selectedOrg.name ? selectedOrg.name.charAt(0).toUpperCase() : 'T')}
+                      </div>
+                      <div>
+                        <h3 
+                          className="text-white font-bold text-xl mb-1"
+                          style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
+                        >
+                          {isRTL ? selectedOrg.name : selectedOrg.nameEn}
+                        </h3>
+                        <p className="text-white/90 text-sm">{selectedOrg.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white/80 text-sm mb-1">{isRTL ? 'المشاريع المحددة' : 'Selected Projects'}</p>
+                      <p className="text-white font-bold text-3xl">{selectedProjects.length}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Project Selection Section */}
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 
+                      className="text-gray-800 font-bold"
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                    >
+                      {isRTL ? 'اختيار المشروع' : 'Project Selection'}
+                    </h2>
+                  </div>
+
+                  {/* Projects List */}
+                  <div className="space-y-0 divide-y divide-gray-200">
+                    {projects.map((project, index) => (
+                      <div
+                        key={project.id}
+                        className="flex items-start gap-4 p-5 hover:bg-gray-50 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedProjects.includes(project.id)}
+                          onChange={() => toggleProject(project.id)}
+                          className="w-5 h-5 mt-1 text-[#67AF31] border-gray-300 rounded focus:ring-[#67AF31] cursor-pointer flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p 
+                            className="text-gray-800 font-medium mb-2 leading-relaxed"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+                          >
+                            {isRTL ? project.name : project.nameEn}
+                          </p>
+                          {project.code ? (
+                            <p className="text-gray-600 text-sm">
+                              {isRTL ? 'الرمز:' : 'Code:'} <span className="font-medium">{project.code}</span>
+                            </p>
+                          ) : (
+                            <p className="text-gray-400 text-sm italic">{isRTL ? 'الرمز: غير متوفر' : 'Code: Not available'}</p>
+                          )}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-[#67AF31] font-bold text-lg">
+                            {project.amount} {project.currency}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

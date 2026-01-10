@@ -4,7 +4,7 @@ import iftarOutsideKuwait from '../assets/افطار_خارج_الكويت.png';
 import iftarGaza from '../assets/افطار_غزة.png';
 import tentsGaza from '../assets/خيام_غزة.png';
 
-const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) => {
+const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChange }) => {
   const [activeMenu, setActiveMenu] = useState('projects');
   const [expandedMenus, setExpandedMenus] = useState({
     communication: false,
@@ -70,7 +70,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مركز حفصة النسائي لدوائر القرآنية وأنشطة الدعوة',
       titleEn: "Hafsa Women's Center for Quranic Circles and Da'wah Activities Project",
       collected: '69 Kwd',
-      projectLink: 'https://basaier.org/2026',
+      projectLink: 'https://baladalkhairorg.org/2026',
       syncStatus: 'Synced',
       country: 'الكويت',
     },
@@ -86,7 +86,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع حفر بئر ارتوازي باسم / محمد عادل... جزاء الراشدي (رحمه الله)',
       titleEn: 'Artesian Well Drilling Project',
       collected: '1501 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'بنين',
     },
@@ -102,7 +102,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع حفر بئر باسم / إبراهيم خيري',
       titleEn: 'Well Drilling Project in the name of / Ibrahim Khairi',
       collected: '0 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'الهند',
     },
@@ -118,7 +118,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'سعود عادل سالم البلول (رحمه الله)',
       titleEn: 'Saud Adel Salem Al-Baloul (may Allah have mercy on him)',
       collected: '564 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'النيجر',
     },
@@ -134,7 +134,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع حفر بئر',
       titleEn: 'Well Drilling Project',
       collected: '250 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'اليمن',
     },
@@ -150,7 +150,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع حفر بئر',
       titleEn: 'Well Drilling Project',
       collected: '800 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'الصومال',
     },
@@ -166,7 +166,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع عقيقة',
       titleEn: 'Aqiqah Project',
       collected: '120 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'بنغلاديش',
     },
@@ -180,7 +180,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
       title: 'مشروع عقيقة',
       titleEn: 'Aqiqah Project',
       collected: '0 Kwd',
-      projectLink: 'https://www.basaier.org/privateprojectar/5',
+      projectLink: 'https://www.baladalkhairorg.org/privateprojectar/5',
       syncStatus: 'Synced',
       country: 'السودان',
     },
@@ -274,7 +274,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
                         setActiveMenu(subItem.id);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
-                            onNavigate('finance');
+                            onNavigate('third-party-finance');
                           } else if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
                           } else if (subItem.id === 'send-message') {
@@ -332,21 +332,25 @@ const AllProjectsScreen = ({ onBack, onNavigate, language, onLanguageChange }) =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
             </button>
+            {onLogout && (
+              <button 
+                onClick={onLogout}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+              </button>
+            )}
             <div className="flex items-center gap-3 px-4 py-2 text-gray-600">
               <div className="w-10 h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                 A
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold">admin@sbs.com</span>
                 <span className="text-xs text-gray-500">{isRTL ? 'مدير' : 'Administrator'}</span>
               </div>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
             </div>
           </div>
         </header>
