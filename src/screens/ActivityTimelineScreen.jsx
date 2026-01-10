@@ -32,7 +32,7 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, language, onLanguageChange
       id: 'communication', 
       label: 'Communication', 
       labelAr: 'التواصل',
-      icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+      icon: '8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
       submenu: [
         { id: 'whatsapp-templates', label: 'WhatsApp Templates', labelAr: 'قوالب واتساب' },
         { id: 'send-message', label: 'Send Message', labelAr: 'إرسال رسالة' },
