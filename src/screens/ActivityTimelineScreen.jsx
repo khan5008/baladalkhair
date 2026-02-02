@@ -142,11 +142,22 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
     return icons[icon] || icons.project;
   };
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${isMobileMenuOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
@@ -169,6 +180,7 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setIsMobileMenuOpen(false);
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -182,16 +194,12 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
                         onNavigate('entities');
                       } else if (item.id === 'reports') {
                         // Already on reports screen
-                      } else if (item.id === 'thirdParty') {
-                        // Third Party menu item - handle submenu
-                      } else if (item.id === 'communication') {
-                        // Communication menu item - handle submenu
                       }
                     }
                   }
                 }}
                 className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
-                  activeMenu === item.id || (item.submenu && activeMenu === 'finance' && expandedMenus[item.id])
+                  activeMenu === item.id || (item.submenu && (activeMenu === 'send-message' || activeMenu === 'whatsapp-templates') && expandedMenus[item.id]) || (item.submenu && activeMenu === 'finance' && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
@@ -222,6 +230,7 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setIsMobileMenuOpen(false);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -256,54 +265,107 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-4">
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div>
+            <div className="hidden sm:block">
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
               >
                 {isRTL ? 'التقارير/الجدول الزمني' : 'Reports/Activity Timeline'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1 hidden lg:block">
                 {isRTL ? 'سجل زمني لأنشطة المشاريع والكيانات' : 'Chronological timeline of project and entity activities'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-            </button>
-            {onLogout && (
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Mobile Profile Dropdown */}
+            <div className="relative lg:hidden">
               <button 
-                onClick={onLogout}
+                onClick={() => setShowMobileProfile(!showMobileProfile)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+              {showMobileProfile && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setShowMobileProfile(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setShowMobileProfile(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Desktop Controls */}
+            <div className="hidden lg:flex items-center gap-4">
+              <button 
+                onClick={toggleLanguage}
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
               </button>
-            )}
+              {onLogout && (
+                <button 
+                  onClick={onLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Filters */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="min-w-[200px] flex-1 relative">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+            <div className="flex-1 relative">
               <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -318,92 +380,94 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
               />
             </div>
-            <select
-              value={selectedActivityType}
-              onChange={(e) => setSelectedActivityType(e.target.value)}
-              className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
-            >
-              <option value="">{isRTL ? 'نوع النشاط' : 'Activity Type'}</option>
-              <option value="created">{isRTL ? 'تم الإنشاء' : 'Created'}</option>
-              <option value="submitted">{isRTL ? 'تم الإرسال' : 'Submitted'}</option>
-              <option value="approved">{isRTL ? 'تمت الموافقة' : 'Approved'}</option>
-              <option value="rejected">{isRTL ? 'تم الرفض' : 'Rejected'}</option>
-            </select>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
-            />
+            <div className="flex gap-3">
+              <select
+                value={selectedActivityType}
+                onChange={(e) => setSelectedActivityType(e.target.value)}
+                className="flex-1 lg:flex-none px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+              >
+                <option value="">{isRTL ? 'نوع النشاط' : 'Activity Type'}</option>
+                <option value="created">{isRTL ? 'تم الإنشاء' : 'Created'}</option>
+                <option value="submitted">{isRTL ? 'تم الإرسال' : 'Submitted'}</option>
+                <option value="approved">{isRTL ? 'تمت الموافقة' : 'Approved'}</option>
+                <option value="rejected">{isRTL ? 'تم الرفض' : 'Rejected'}</option>
+              </select>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="flex-1 lg:flex-none px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
           <div className="max-w-4xl mx-auto">
             {/* Recent Activities Summary */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6 mb-6">
               <h2 
-                className="text-gray-800 font-bold mb-4"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 700 }}
+                className="text-gray-800 font-bold mb-4 text-base lg:text-lg"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
               >
                 {isRTL ? 'ملخص الأنشطة (آخر 7 أيام)' : 'Recent Activities Summary (Last 7 Days)'}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                <div className="bg-blue-50 rounded-lg p-3 lg:p-4 border border-blue-200">
                   <p 
-                    className="text-blue-700 font-bold text-2xl mb-1"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                    className="text-blue-700 font-bold text-xl lg:text-2xl mb-1"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                   >
                     12
                   </p>
                   <p 
-                    className="text-blue-600 text-sm"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                    className="text-blue-600 text-xs lg:text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'مشروع جديد' : 'New Projects'}
                   </p>
                 </div>
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                <div className="bg-yellow-50 rounded-lg p-3 lg:p-4 border border-yellow-200">
                   <p 
-                    className="text-yellow-700 font-bold text-2xl mb-1"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                    className="text-yellow-700 font-bold text-xl lg:text-2xl mb-1"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                   >
                     8
                   </p>
                   <p 
-                    className="text-yellow-600 text-sm"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                    className="text-yellow-600 text-xs lg:text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'مراحل مرفوعة' : 'Phases Submitted'}
                   </p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="bg-green-50 rounded-lg p-3 lg:p-4 border border-green-200">
                   <p 
-                    className="text-green-700 font-bold text-2xl mb-1"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                    className="text-green-700 font-bold text-xl lg:text-2xl mb-1"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                   >
                     15
                   </p>
                   <p 
-                    className="text-green-600 text-sm"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                    className="text-green-600 text-xs lg:text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'موافقات' : 'Approvals'}
                   </p>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <div className="bg-purple-50 rounded-lg p-3 lg:p-4 border border-purple-200">
                   <p 
-                    className="text-purple-700 font-bold text-2xl mb-1"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                    className="text-purple-700 font-bold text-xl lg:text-2xl mb-1"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                   >
                     5
                   </p>
                   <p 
-                    className="text-purple-600 text-sm"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                    className="text-purple-600 text-xs lg:text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'كيانات جديدة' : 'New Entities'}
                   </p>
@@ -412,79 +476,83 @@ const ActivityTimelineScreen = ({ onBack, onNavigate, onLogout, language, onLang
             </div>
 
             {/* Activity Timeline */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
               <h2 
-                className="text-gray-800 font-bold mb-6"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 700 }}
+                className="text-gray-800 font-bold mb-6 text-base lg:text-lg"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
               >
                 {isRTL ? 'الجدول الزمني للأنشطة' : 'Activity Timeline'}
               </h2>
-              <div className="space-y-5">
+              <div className="space-y-4 lg:space-y-5">
                 {activities.map((activity, index) => (
                   <div key={activity.id} className="relative group">
                     {index < activities.length - 1 && (
-                      <div className={`absolute ${isRTL ? 'right-6' : 'left-6'} top-14 bottom-0 w-0.5 bg-gradient-to-b from-gray-300 to-gray-100 transition-all duration-300`}></div>
+                      <div className={`absolute ${isRTL ? 'right-5 lg:right-6' : 'left-5 lg:left-6'} top-12 lg:top-14 bottom-0 w-0.5 bg-gradient-to-b from-gray-300 to-gray-100 transition-all duration-300`}></div>
                     )}
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg transition-all duration-300 group-hover:scale-110 z-10 ${
+                    <div className="flex items-start gap-3 lg:gap-4">
+                      <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg transition-all duration-300 group-hover:scale-110 z-10 ${
                         activity.color === 'blue' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
                         activity.color === 'yellow' ? 'bg-gradient-to-br from-yellow-500 to-yellow-600' :
                         activity.color === 'green' ? 'bg-gradient-to-br from-green-500 to-green-600' :
                         activity.color === 'orange' ? 'bg-gradient-to-br from-orange-500 to-orange-600' :
                         'bg-gradient-to-br from-purple-500 to-purple-600'
                       }`}>
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getActivityIcon(activity.icon)} />
                         </svg>
                       </div>
-                      <div className="flex-1 bg-gradient-to-br from-white to-gray-50 rounded-xl p-5 border border-gray-200 hover:shadow-lg hover:border-[#67AF31]/30 transition-all duration-300 group-hover:scale-[1.01]">
+                      <div className="flex-1 bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 lg:p-5 border border-gray-200 hover:shadow-lg hover:border-[#67AF31]/30 transition-all duration-300 group-hover:scale-[1.01]">
                         <div className="space-y-2">
                           <p 
-                            className={`font-bold ${
+                            className={`font-bold text-sm lg:text-base ${
                               activity.color === 'blue' ? 'text-blue-700' :
                               activity.color === 'yellow' ? 'text-yellow-700' :
                               activity.color === 'green' ? 'text-green-700' :
                               activity.color === 'orange' ? 'text-orange-700' :
                               'text-purple-700'
                             }`}
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 700 }}
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                           >
                             {isRTL ? activity.typeAr : activity.type}
                           </p>
                           <p 
-                            className="text-gray-800 font-semibold"
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 600 }}
+                            className="text-gray-800 font-semibold text-sm lg:text-base"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 600 }}
                           >
                             {activity.project ? (isRTL ? activity.projectAr : activity.project) : (isRTL ? activity.entityAr : activity.entity)}
                           </p>
                           {activity.phase && (
                             <p 
-                              className="text-gray-600 text-sm px-3 py-1 bg-gray-100 rounded-lg inline-block"
-                              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 500 }}
+                              className="text-gray-600 text-xs lg:text-sm px-3 py-1 bg-gray-100 rounded-lg inline-block"
+                              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 500 }}
                             >
                               {isRTL ? activity.phaseAr : activity.phase}
                             </p>
                           )}
-                          <div className="flex items-center gap-2 pt-2 mt-2 border-t border-gray-100">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <p 
-                              className="text-gray-500 text-sm"
-                              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
-                            >
-                              {isRTL ? activity.userAr : activity.user}
-                            </p>
-                            <span className="text-gray-300">•</span>
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p 
-                              className="text-gray-500 text-sm"
-                              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
-                            >
-                              {activity.date}
-                            </p>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 mt-2 border-t border-gray-100">
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <p 
+                                className="text-gray-500 text-xs lg:text-sm"
+                                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 400 }}
+                              >
+                                {isRTL ? activity.userAr : activity.user}
+                              </p>
+                            </div>
+                            <span className="text-gray-300 hidden sm:inline">•</span>
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <p 
+                                className="text-gray-500 text-xs lg:text-sm"
+                                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 400 }}
+                              >
+                                {activity.date}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -144,11 +144,23 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
   const endIndex = startIndex + perPage;
   const displayedOrgs = organizations.slice(startIndex, endIndex);
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar with Green Gradient */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${isMobileMenuOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
@@ -177,6 +189,7 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setIsMobileMenuOpen(false);
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -189,17 +202,17 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                   }
                 }}
                 className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
-                  activeMenu === item.id 
+                  activeMenu === item.id || (item.submenu && activeMenu === 'finance' && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
               >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -217,12 +230,13 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setIsMobileMenuOpen(false);
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             // Already on third-party-finance screen
-                            onNavigate('third-party-finance');
                           } else if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
                           } else if (subItem.id === 'send-message') {
@@ -232,7 +246,7 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                       }}
                       className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
                         activeMenu === subItem.id 
-                          ? 'bg-white text-[#67AF31] font-semibold' 
+                          ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
@@ -257,76 +271,129 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
         {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-4">
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <button onClick={handleBackClick} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div>
+            <div className="hidden sm:block">
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
               >
                 {isRTL ? 'المالية الطرف الثالث' : 'Third Party Finance'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1 hidden lg:block">
                 {isRTL ? 'إدارة سندات الدفع لمنظمات الطرف الثالث' : 'Manage payment challans for third party organizations'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-            </button>
-            {onLogout && (
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Mobile Profile Dropdown */}
+            <div className="relative lg:hidden">
               <button 
-                onClick={onLogout}
+                onClick={() => setShowMobileProfile(!showMobileProfile)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+              {showMobileProfile && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setShowMobileProfile(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setShowMobileProfile(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Desktop Controls */}
+            <div className="hidden lg:flex items-center gap-4">
+              <button 
+                onClick={toggleLanguage}
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
               </button>
-            )}
-            <button className="px-6 py-2.5 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
-              {isRTL ? 'إنشاء سند' : 'Create Challan'}
-            </button>
-            <button className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200">
-              {isRTL ? 'كل المالية' : 'All Finance'}
-            </button>
+              {onLogout && (
+                <button 
+                  onClick={onLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                </button>
+              )}
+              <button className="px-4 lg:px-6 py-2.5 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm lg:text-base">
+                {isRTL ? 'إنشاء سند' : 'Create Challan'}
+              </button>
+              <button className="px-4 lg:px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200 text-sm lg:text-base">
+                {isRTL ? 'كل المالية' : 'All Finance'}
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Progress Indicator */}
-        <div className="bg-white border-b border-gray-200 px-6 py-6">
-          <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 lg:py-6">
+          <div className="flex items-center justify-center gap-2 lg:gap-4 max-w-2xl mx-auto">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
+                  <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
                     currentStep >= step.id
                       ? 'bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white shadow-lg'
                       : 'bg-gray-200 text-gray-500'
                   }`}>
                     {step.id}
                   </div>
-                  <span className={`text-sm font-semibold mt-2 transition-colors ${
+                  <span className={`text-xs lg:text-sm font-semibold mt-2 transition-colors text-center ${
                     currentStep >= step.id ? 'text-[#67AF31]' : 'text-gray-500'
-                  }`} style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}>
+                  }`} style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                     {isRTL ? step.labelAr : step.label}
                   </span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-4 transition-colors ${
+                  <div className={`flex-1 h-0.5 mx-2 lg:mx-4 transition-colors ${
                     currentStep > step.id ? 'bg-[#67AF31]' : 'bg-gray-200'
                   }`} />
                 )}
@@ -336,32 +403,49 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
             {currentStep === 1 ? (
               <>
                 {/* Section Title */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
                   <h2 
-                    className="text-gray-800 font-bold"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                    className="text-gray-800 font-bold text-lg lg:text-xl"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                   >
                     {isRTL ? 'اختر المنظمة' : 'Select Organization'}
                   </h2>
                 </div>
 
-                {/* Search and Filter Bar */}
+                {/* Mobile Filter Toggle */}
+                <div className="lg:hidden mb-4">
+                  <button
+                    onClick={() => setShowMobileFilters(!showMobileFilters)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white rounded-xl shadow-md border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'الفلاتر' : 'Filters'}</span>
+                    </div>
+                    <svg className={`w-5 h-5 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
 
-                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-6">
-              <div className="flex flex-wrap items-center gap-4">
+                {/* Search and Filter Bar */}
+                <div className={`bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-4 lg:mb-6 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Search Input */}
-                <div className="flex-1 min-w-[250px]">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 lg:hidden">
                     {isRTL ? 'بحث' : 'Search'}
                   </label>
                   <div className="relative">
@@ -381,56 +465,58 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                   </div>
                 </div>
 
-                {/* Country Dropdown */}
-                <div className="min-w-[200px]">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {isRTL ? 'البلد' : 'Country'}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={selectedCountry}
-                      onChange={(e) => setSelectedCountry(e.target.value)}
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 appearance-none pr-10"
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
-                    >
-                      <option value="">{isRTL ? 'البحث عن بلد...' : 'Search country...'}</option>
-                      <option value="morocco">{isRTL ? 'المغرب' : 'Morocco'}</option>
-                      <option value="niger">{isRTL ? 'النيجر' : 'Niger'}</option>
-                      <option value="nigeria">{isRTL ? 'نيجريا' : 'Nigeria'}</option>
-                      <option value="somalia">{isRTL ? 'الصومال' : 'Somalia'}</option>
-                      <option value="sudan">{isRTL ? 'السودان' : 'Sudan'}</option>
-                      <option value="benin">{isRTL ? 'بنين' : 'Benin'}</option>
-                      <option value="india">{isRTL ? 'الهند' : 'India'}</option>
-                    </select>
-                    <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Country Dropdown */}
+                  <div className="flex-1 sm:min-w-[200px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 lg:hidden">
+                      {isRTL ? 'البلد' : 'Country'}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 appearance-none pr-10"
+                        style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                      >
+                        <option value="">{isRTL ? 'البحث عن بلد...' : 'Search country...'}</option>
+                        <option value="morocco">{isRTL ? 'المغرب' : 'Morocco'}</option>
+                        <option value="niger">{isRTL ? 'النيجر' : 'Niger'}</option>
+                        <option value="nigeria">{isRTL ? 'نيجريا' : 'Nigeria'}</option>
+                        <option value="somalia">{isRTL ? 'الصومال' : 'Somalia'}</option>
+                        <option value="sudan">{isRTL ? 'السودان' : 'Sudan'}</option>
+                        <option value="benin">{isRTL ? 'بنين' : 'Benin'}</option>
+                        <option value="india">{isRTL ? 'الهند' : 'India'}</option>
+                      </select>
+                      <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Per Page Dropdown */}
-                <div className="min-w-[150px]">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {isRTL ? 'لكل صفحة' : 'Per Page'}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={perPage}
-                      onChange={(e) => setPerPage(Number(e.target.value))}
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 appearance-none pr-10"
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
-                    >
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                    </select>
-                    <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                  {/* Per Page Dropdown */}
+                  <div className="flex-1 sm:min-w-[150px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 lg:hidden">
+                      {isRTL ? 'لكل صفحة' : 'Per Page'}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={perPage}
+                        onChange={(e) => setPerPage(Number(e.target.value))}
+                        className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 appearance-none pr-10"
+                        style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                      >
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                      </select>
+                      <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -438,16 +524,16 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
             </div>
 
                 {/* Organization Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-6">
               {displayedOrgs.map((org) => (
                 <div
                   key={org.id}
-                  className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+                  className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                   onClick={() => handleOrgSelect(org)}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3 lg:gap-4">
                     <div 
-                      className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg flex-shrink-0 backdrop-blur-sm border border-white/20"
+                      className="w-12 h-12 lg:w-16 lg:h-16 rounded-xl flex items-center justify-center text-white font-bold text-lg lg:text-2xl shadow-lg flex-shrink-0 backdrop-blur-sm border border-white/20"
                       style={{
                         background: 'linear-gradient(135deg, rgba(103, 175, 49, 0.9) 0%, rgba(124, 179, 66, 0.85) 50%, rgba(139, 195, 74, 0.9) 100%)',
                         boxShadow: '0 8px 32px 0 rgba(103, 175, 49, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)'
@@ -457,31 +543,31 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 
-                        className="text-gray-800 font-semibold mb-2 line-clamp-2"
-                        style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 600 }}
+                        className="text-gray-800 font-semibold mb-2 line-clamp-2 text-sm lg:text-base"
+                        style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 600 }}
                       >
                         {isRTL ? org.name : org.nameEn}
                       </h3>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-1 lg:space-y-2 text-xs lg:text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                           </svg>
                           <span className="truncate">{org.email}</span>
                         </div>
                         {org.country && (
                           <div className="flex items-center gap-2 text-gray-600">
-                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span>{isRTL ? org.country : org.countryEn}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-2 text-gray-600">
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
-                          <span>{org.phone}</span>
+                          <span className="truncate">{org.phone}</span>
                         </div>
                       </div>
                     </div>
@@ -491,11 +577,11 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
             </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-center gap-4 mt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${
+                    className={`w-full sm:w-auto px-4 py-2 rounded-xl transition-all duration-200 ${
                       currentPage === 1
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
@@ -505,15 +591,15 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                     {isRTL ? 'السابق' : 'Prev'}
                   </button>
                   <span 
-                    className="text-gray-700 font-medium"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                    className="text-gray-700 font-medium text-sm lg:text-base"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
                   </span>
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${
+                    className={`w-full sm:w-auto px-4 py-2 rounded-xl transition-all duration-200 ${
                       currentPage === totalPages
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#67AF31] hover:text-[#67AF31]'
@@ -527,15 +613,15 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
             ) : currentStep === 2 && selectedOrg ? (
               <>
                 {/* Selected Organization Card */}
-                <div className="bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-xl shadow-lg p-6 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-[#67AF31] font-bold text-2xl shadow-md">
+                <div className="bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-xl shadow-lg p-4 lg:p-6 mb-4 lg:mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-3 lg:gap-4">
+                      <div className="w-12 h-12 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center text-[#67AF31] font-bold text-lg lg:text-2xl shadow-md">
                         {selectedOrg.icon || (selectedOrg.name ? selectedOrg.name.charAt(0).toUpperCase() : 'T')}
                       </div>
                       <div>
                         <h3 
-                          className="text-white font-bold text-xl mb-1"
+                          className="text-white font-bold text-base lg:text-xl mb-1"
                           style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                         >
                           {isRTL ? selectedOrg.name : selectedOrg.nameEn}
@@ -543,24 +629,24 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                         <p className="text-white/90 text-sm">{selectedOrg.email}</p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-center sm:text-right">
                       <p className="text-white/80 text-sm mb-1">{isRTL ? 'المشاريع المحددة' : 'Selected Projects'}</p>
-                      <p className="text-white font-bold text-3xl">{selectedProjects.length}</p>
+                      <p className="text-white font-bold text-2xl lg:text-3xl">{selectedProjects.length}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Project Selection Section */}
-                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                     <h2 
-                      className="text-gray-800 font-bold"
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                      className="text-gray-800 font-bold text-lg lg:text-xl"
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                     >
                       {isRTL ? 'اختيار المشروع' : 'Project Selection'}
                     </h2>
@@ -571,31 +657,31 @@ const ThirdPartyFinanceScreen = ({ onBack, onNavigate, onLogout, language, onLan
                     {projects.map((project, index) => (
                       <div
                         key={project.id}
-                        className="flex items-start gap-4 p-5 hover:bg-gray-50 transition-colors"
+                        className="flex items-start gap-3 lg:gap-4 p-4 lg:p-5 hover:bg-gray-50 transition-colors"
                       >
                         <input
                           type="checkbox"
                           checked={selectedProjects.includes(project.id)}
                           onChange={() => toggleProject(project.id)}
-                          className="w-5 h-5 mt-1 text-[#67AF31] border-gray-300 rounded focus:ring-[#67AF31] cursor-pointer flex-shrink-0"
+                          className="w-4 h-4 lg:w-5 lg:h-5 mt-1 text-[#67AF31] border-gray-300 rounded focus:ring-[#67AF31] cursor-pointer flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <p 
-                            className="text-gray-800 font-medium mb-2 leading-relaxed"
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+                            className="text-gray-800 font-medium mb-2 leading-relaxed text-sm lg:text-base"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? project.name : project.nameEn}
                           </p>
                           {project.code ? (
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-gray-600 text-xs lg:text-sm">
                               {isRTL ? 'الرمز:' : 'Code:'} <span className="font-medium">{project.code}</span>
                             </p>
                           ) : (
-                            <p className="text-gray-400 text-sm italic">{isRTL ? 'الرمز: غير متوفر' : 'Code: Not available'}</p>
+                            <p className="text-gray-400 text-xs lg:text-sm italic">{isRTL ? 'الرمز: غير متوفر' : 'Code: Not available'}</p>
                           )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-[#67AF31] font-bold text-lg">
+                          <p className="text-[#67AF31] font-bold text-base lg:text-lg">
                             {project.amount} {project.currency}
                           </p>
                         </div>

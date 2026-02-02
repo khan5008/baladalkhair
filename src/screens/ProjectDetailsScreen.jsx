@@ -155,11 +155,22 @@ const ProjectDetailsScreen = ({ projectId, onBack, onNavigate, onLogout, languag
   const currentPhase = currentPhaseData[activePhase] || currentPhaseData.initiation;
   const currentPhaseInfo = phases.find(p => p.id === activePhase) || phases[0];
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${isMobileMenuOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
@@ -271,49 +282,102 @@ const ProjectDetailsScreen = ({ projectId, onBack, onNavigate, onLogout, languag
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-4">
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div>
+            <div className="hidden sm:block">
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
               >
                 {isRTL ? 'تفاصيل المشروع' : 'Project Details'}
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-            </button>
-            {onLogout && (
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Mobile Profile Dropdown */}
+            <div className="relative lg:hidden">
               <button 
-                onClick={onLogout}
+                onClick={() => setShowMobileProfile(!showMobileProfile)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+              {showMobileProfile && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setShowMobileProfile(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setShowMobileProfile(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Desktop Controls */}
+            <div className="hidden lg:flex items-center gap-4">
+              <button 
+                onClick={toggleLanguage}
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
               </button>
-            )}
+              {onLogout && (
+                <button 
+                  onClick={onLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
+          <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6">
             {/* Project Summary Card - Modern Design */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300">
               <div className="flex flex-col lg:flex-row">

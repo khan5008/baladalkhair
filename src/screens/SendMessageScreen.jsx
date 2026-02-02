@@ -51,11 +51,22 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
     },
   ];
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${isMobileMenuOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
@@ -78,6 +89,7 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setIsMobileMenuOpen(false);
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -96,7 +108,7 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                   }
                 }}
                 className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
-                  activeMenu === item.id || (item.submenu && activeMenu === 'send-message' && expandedMenus[item.id])
+                  activeMenu === item.id || (item.submenu && (activeMenu === 'send-message' || activeMenu === 'whatsapp-templates') && expandedMenus[item.id]) || (item.submenu && activeMenu === 'finance' && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
@@ -127,6 +139,7 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setIsMobileMenuOpen(false);
                         if (onNavigate) {
                           if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
@@ -161,11 +174,20 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden bg-gray-50">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-gray-50">
         {/* Left Panel - Form */}
         <div className="flex-1 flex flex-col">
-          <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+          <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
+              {/* Mobile Menu Button */}
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
               <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -173,48 +195,92 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
               </button>
               <div>
                 <h1 
-                  className="text-gray-800 font-bold"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                  className="text-gray-800 font-bold text-lg lg:text-2xl"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontWeight: 700 }}
                 >
                   {isRTL ? 'إرسال رسائل واتساب' : 'Send WhatsApp Messages'}
                 </h1>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={toggleLanguage}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
-              </button>
-              {onLogout && (
+            <div className="flex items-center gap-2 lg:gap-4">
+              {/* Mobile Profile Dropdown */}
+              <div className="relative lg:hidden">
                 <button 
-                  onClick={onLogout}
+                  onClick={() => setShowMobileProfile(!showMobileProfile)}
+                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
+                {showMobileProfile && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <button 
+                      onClick={() => {
+                        toggleLanguage();
+                        setShowMobileProfile(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                    </button>
+                    {onLogout && (
+                      <button 
+                        onClick={() => {
+                          onLogout();
+                          setShowMobileProfile(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {/* Desktop Controls */}
+              <div className="hidden lg:flex items-center gap-4">
+                <button 
+                  onClick={toggleLanguage}
                   className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                  <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
                 </button>
-              )}
+                {onLogout && (
+                  <button 
+                    onClick={onLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                  </button>
+                )}
+              </div>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-2xl mx-auto space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+            <div className="max-w-2xl mx-auto space-y-4 lg:space-y-6">
               {/* Source Selection */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-lg font-semibold text-gray-800 mb-4"
+                  className="text-base lg:text-lg font-semibold text-gray-800 mb-4"
                   style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'المصدر' : 'Source'}
                 </h3>
-                <div className="flex gap-6">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <label className="flex items-center">
                     <input
                       type="radio"
@@ -251,14 +317,14 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
               </div>
 
               {/* Recipients Selection */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-lg font-semibold text-gray-800 mb-4"
+                  className="text-base lg:text-lg font-semibold text-gray-800 mb-4"
                   style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'المستقبلون' : 'Recipients'}
                 </h3>
-                <div className="flex gap-6 mb-4">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-4">
                   <label className="flex items-center">
                     <input
                       type="radio"
@@ -311,7 +377,7 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <button 
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
@@ -329,9 +395,9 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
               </div>
 
               {/* Template Selection */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-lg font-semibold text-gray-800 mb-4"
+                  className="text-base lg:text-lg font-semibold text-gray-800 mb-4"
                   style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'اختيار القالب' : 'Select Template'}
@@ -350,9 +416,9 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
               </div>
 
               {/* Message Type */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-lg font-semibold text-gray-800 mb-4"
+                  className="text-base lg:text-lg font-semibold text-gray-800 mb-4"
                   style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'نوع الرسالة' : 'Message Type'}
@@ -381,7 +447,7 @@ const SendMessageScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
         </div>
 
         {/* Right Panel - WhatsApp Preview */}
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+        <div className="hidden lg:flex w-80 bg-white border-l border-gray-200 flex-col">
           <div className="p-4 border-b border-gray-200 bg-gray-50">
             <h3 
               className="text-lg font-semibold text-gray-800"

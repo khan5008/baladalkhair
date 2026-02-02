@@ -7,6 +7,9 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
   const [filterStatus, setFilterStatus] = useState('');
   const [expandedMenus, setExpandedMenus] = useState({});
   const [activeMenu, setActiveMenu] = useState('entities');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleMenu = (menu) => {
@@ -126,22 +129,32 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`nav::-webkit-scrollbar { display: none; }`}</style>
           {menuItems.map((item) => (
             <div key={item.id}>
@@ -151,6 +164,7 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -172,18 +186,18 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id || (item.submenu && (activeMenu === 'finance' || activeMenu === 'whatsapp-templates' || activeMenu === 'send-message') && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -197,13 +211,14 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -214,12 +229,12 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -230,7 +245,7 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
           ))}
         </nav>
 
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -238,30 +253,44 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Back Button */}
+            <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'الكيانات' : 'Entities'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">
                 {isRTL ? 'إدارة الكيانات المسجلة والمعلقة' : 'Manage registered and pending entities'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -271,7 +300,7 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -279,12 +308,95 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Search and Filter */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-3">
+        {/* Mobile Search and Filter */}
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 shadow-sm sticky top-16 lg:top-20 z-20">
+          {/* Mobile Search Bar */}
+          <div className="lg:hidden mb-3">
+            <div className="relative">
+              <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isRTL ? "البحث عن كيان..." : "Search entity..."}
+                className={`w-full ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-sm`}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Filter Toggle */}
+          <div className="lg:hidden flex items-center justify-between">
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+              </svg>
+              <span className="text-sm font-medium">{isRTL ? 'الفلاتر' : 'Filters'}</span>
+              <svg className={`w-4 h-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden lg:flex flex-wrap items-center gap-3">
             <div className="min-w-[250px] flex-1 relative">
               <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,6 +434,35 @@ const EntitiesScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChan
               <option value="rejected">{isRTL ? 'مرفوض' : 'Rejected'}</option>
             </select>
           </div>
+
+          {/* Mobile Collapsible Filters */}
+          {filtersOpen && (
+            <div className="lg:hidden space-y-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-1 gap-3">
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                >
+                  <option value="">{isRTL ? 'النوع' : 'Type'}</option>
+                  <option value="ngo">{isRTL ? 'منظمة غير حكومية' : 'NGO'}</option>
+                  <option value="partner">{isRTL ? 'شريك' : 'Partner'}</option>
+                </select>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                >
+                  <option value="">{isRTL ? 'الحالة' : 'Status'}</option>
+                  <option value="approved">{isRTL ? 'موافق عليه' : 'Approved'}</option>
+                  <option value="pending">{isRTL ? 'في الانتظار' : 'Pending'}</option>
+                  <option value="rejected">{isRTL ? 'مرفوض' : 'Rejected'}</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Scrollable Content */}
