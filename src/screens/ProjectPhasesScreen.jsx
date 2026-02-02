@@ -10,6 +10,8 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
   const [taskDescription, setTaskDescription] = useState('');
   const [selectedBacklog, setSelectedBacklog] = useState('Backlog');
   const [selectedDate, setSelectedDate] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleMenu = (menuId) => {
@@ -61,22 +63,32 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`nav::-webkit-scrollbar { display: none; }`}</style>
           {menuItems.map((item) => (
             <div key={item.id}>
@@ -86,6 +98,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -101,18 +114,18 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -126,13 +139,14 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -143,12 +157,12 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -159,7 +173,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           ))}
         </nav>
 
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -167,29 +181,42 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        {/* Header with Stats */}
-        <div className="bg-white border-b border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header with Stats */}
+        <div className="bg-white border-b border-gray-200 p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
+            <div className="flex items-center gap-3 lg:gap-4">
+              {/* Mobile Hamburger Menu */}
+              <button 
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              {/* Desktop Back Button */}
+              <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div>
                 <h1 
-                  className="text-gray-800 font-bold"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                  className="text-gray-800 font-bold text-lg lg:text-2xl"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'مراحل المشروع' : 'Project Phases'}
                 </h1>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            
+            {/* Mobile Profile Menu */}
+            <div className="flex items-center gap-2 lg:gap-4">
+              {/* Desktop Language & Logout (hidden on mobile) */}
               <button 
                 onClick={toggleLanguage}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -199,7 +226,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
               {onLogout && (
                 <button 
                   onClick={onLogout}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -207,15 +234,62 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                   <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
                 </button>
               )}
+              
+              {/* Mobile Profile Button */}
+              <div className="relative">
+                <button 
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+                >
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                    A
+                  </div>
+                  <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Mobile Profile Dropdown */}
+                {profileMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                    <button 
+                      onClick={() => {
+                        toggleLanguage();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                    </button>
+                    {onLogout && (
+                      <button 
+                        onClick={() => {
+                          onLogout();
+                          setProfileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          {/* Stats Cards - Mobile Single Column */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 mb-4 lg:mb-6">
+            <div className="bg-blue-50 rounded-lg p-3 lg:p-4 border border-blue-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
@@ -227,7 +301,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     {isRTL ? 'المهام المفتوحة' : 'Open Tasks'}
                   </p>
                   <p 
-                    className="text-blue-700 font-bold text-2xl"
+                    className="text-blue-700 font-bold text-xl lg:text-2xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     12
@@ -242,10 +316,10 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
               </div>
             </div>
 
-            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+            <div className="bg-yellow-50 rounded-lg p-3 lg:p-4 border border-yellow-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -257,7 +331,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     {isRTL ? 'التالي المستحق' : 'Next Due'}
                   </p>
                   <p 
-                    className="text-yellow-700 font-bold text-2xl"
+                    className="text-yellow-700 font-bold text-xl lg:text-2xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     5
@@ -272,10 +346,10 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+            <div className="bg-green-50 rounded-lg p-3 lg:p-4 border border-green-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
@@ -287,7 +361,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     {isRTL ? 'التقدم' : 'Progress'}
                   </p>
                   <p 
-                    className="text-green-700 font-bold text-2xl"
+                    className="text-green-700 font-bold text-xl lg:text-2xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     75%
@@ -304,61 +378,61 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="flex gap-1 px-6">
+        {/* Mobile Scrollable Tabs Navigation */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+          <div className="flex gap-1 px-4 lg:px-6 overflow-x-auto scrollbar-hide">
             <button 
               onClick={() => setActiveTab('calendar')}
-              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+              className={`px-3 lg:px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'calendar'
                   ? 'text-gray-800 border-b-2 border-gray-800'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {isRTL ? 'التقويم' : 'Calendar'}
             </button>
             <button 
               onClick={() => setActiveTab('gantt')}
-              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+              className={`px-3 lg:px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'gantt'
                   ? 'text-gray-800 border-b-2 border-gray-800'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               {isRTL ? 'جانت' : 'Gantt'}
             </button>
             <button 
               onClick={() => setActiveTab('forms')}
-              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+              className={`px-3 lg:px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'forms'
                   ? 'text-gray-800 border-b-2 border-gray-800'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               {isRTL ? 'النماذج' : 'Forms'}
             </button>
             <button 
               onClick={() => setActiveTab('projectStory')}
-              className={`px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 ${
+              className={`px-3 lg:px-4 py-3 flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'projectStory'
                   ? 'text-gray-800 border-b-2 border-gray-800'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '15px' }}
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               {isRTL ? 'قصة المشروع' : 'Project Story'}
@@ -366,22 +440,22 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           </div>
         </div>
 
-        {/* Tab Content */}
+        {/* Tab Content - Mobile Responsive */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           {activeTab === 'calendar' && (
-            <div className="p-6">
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            <div className="p-4 lg:p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-gray-800 font-bold mb-6"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                  className="text-gray-800 font-bold mb-4 lg:mb-6 text-lg lg:text-xl"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'تقويم المشروع' : 'Project Calendar'}
                 </h3>
-                {/* Calendar View */}
-                <div className="grid grid-cols-7 gap-2 mb-4">
+                {/* Mobile Calendar View */}
+                <div className="grid grid-cols-7 gap-1 lg:gap-2 mb-4">
                   {/* Calendar Header */}
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
-                    <div key={idx} className="text-center text-sm font-semibold text-gray-600 py-2">
+                    <div key={idx} className="text-center text-xs lg:text-sm font-semibold text-gray-600 py-1 lg:py-2">
                       {isRTL ? ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'][idx] : day}
                     </div>
                   ))}
@@ -393,7 +467,7 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     return (
                       <div
                         key={idx}
-                        className={`aspect-square rounded-lg border-2 flex flex-col items-center justify-center p-2 ${
+                        className={`aspect-square rounded-lg border-2 flex flex-col items-center justify-center p-1 lg:p-2 ${
                           isCurrentMonth
                             ? isToday
                               ? 'bg-[#67AF31] text-white border-[#67AF31]'
@@ -402,17 +476,17 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                         }`}
                       >
                         {isCurrentMonth && (
-                          <span className="text-sm font-medium">{day}</span>
+                          <span className="text-xs lg:text-sm font-medium">{day}</span>
                         )}
                       </div>
                     );
                   })}
                 </div>
-                {/* Calendar Events */}
-                <div className="mt-6 space-y-3">
+                {/* Calendar Events - Mobile Optimized */}
+                <div className="mt-4 lg:mt-6 space-y-2 lg:space-y-3">
                   <h4 
-                    className="text-gray-700 font-semibold mb-3"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                    className="text-gray-700 font-semibold mb-2 lg:mb-3 text-sm lg:text-base"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'الأحداث القادمة' : 'Upcoming Events'}
                   </h4>
@@ -421,13 +495,13 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     { date: '18', title: 'Project Milestone', titleAr: 'معلم المشروع', time: '2:00 PM' },
                     { date: '22', title: 'Stakeholder Presentation', titleAr: 'عرض لأصحاب المصلحة', time: '11:00 AM' },
                   ].map((event, idx) => (
-                    <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="w-12 h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center text-white font-bold">
+                    <div key={idx} className="flex items-center gap-3 lg:gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-lg flex items-center justify-center text-white font-bold text-sm lg:text-base">
                         {event.date}
                       </div>
                       <div className="flex-1">
-                        <p className="text-gray-800 font-medium">{isRTL ? event.titleAr : event.title}</p>
-                        <p className="text-gray-500 text-sm">{event.time}</p>
+                        <p className="text-gray-800 font-medium text-sm lg:text-base">{isRTL ? event.titleAr : event.title}</p>
+                        <p className="text-gray-500 text-xs lg:text-sm">{event.time}</p>
                       </div>
                     </div>
                   ))}
@@ -437,16 +511,16 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           )}
 
           {activeTab === 'gantt' && (
-            <div className="p-6">
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            <div className="p-4 lg:p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="text-gray-800 font-bold mb-6"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                  className="text-gray-800 font-bold mb-4 lg:mb-6 text-lg lg:text-xl"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'مخطط جانت' : 'Gantt Chart'}
                 </h3>
-                {/* Gantt Chart */}
-                <div className="space-y-4">
+                {/* Mobile Gantt Chart */}
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'Phase 1: Initiation', nameAr: 'المرحلة 1: البدء', progress: 100, start: 'Week 1', end: 'Week 4', color: 'bg-green-500' },
                     { name: 'Phase 2: Planning', nameAr: 'المرحلة 2: التخطيط', progress: 75, start: 'Week 3', end: 'Week 8', color: 'bg-blue-500' },
@@ -456,10 +530,10 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                   ].map((phase, idx) => (
                     <div key={idx} className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 font-medium text-sm">{isRTL ? phase.nameAr : phase.name}</span>
-                        <span className="text-gray-500 text-xs">{phase.start} - {phase.end}</span>
+                        <span className="text-gray-700 font-medium text-sm lg:text-base">{isRTL ? phase.nameAr : phase.name}</span>
+                        <span className="text-gray-500 text-xs lg:text-sm">{phase.start} - {phase.end}</span>
                       </div>
-                      <div className="relative h-8 bg-gray-200 rounded-lg overflow-hidden">
+                      <div className="relative h-6 lg:h-8 bg-gray-200 rounded-lg overflow-hidden">
                         <div
                           className={`h-full ${phase.color} rounded-lg transition-all duration-300 flex items-center justify-end pr-2`}
                           style={{ width: `${phase.progress}%` }}
@@ -475,24 +549,24 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     </div>
                   ))}
                 </div>
-                {/* Timeline Legend */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex items-center gap-6 flex-wrap">
+                {/* Timeline Legend - Mobile Responsive */}
+                <div className="mt-4 lg:mt-6 pt-4 lg:pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 lg:flex lg:items-center gap-3 lg:gap-6">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-500 rounded"></div>
-                      <span className="text-sm text-gray-600">{isRTL ? 'مكتمل' : 'Completed'}</span>
+                      <div className="w-3 h-3 lg:w-4 lg:h-4 bg-green-500 rounded"></div>
+                      <span className="text-xs lg:text-sm text-gray-600">{isRTL ? 'مكتمل' : 'Completed'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                      <span className="text-sm text-gray-600">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</span>
+                      <div className="w-3 h-3 lg:w-4 lg:h-4 bg-blue-500 rounded"></div>
+                      <span className="text-xs lg:text-sm text-gray-600">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                      <span className="text-sm text-gray-600">{isRTL ? 'مخطط' : 'Planned'}</span>
+                      <div className="w-3 h-3 lg:w-4 lg:h-4 bg-yellow-500 rounded"></div>
+                      <span className="text-xs lg:text-sm text-gray-600">{isRTL ? 'مخطط' : 'Planned'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gray-400 rounded"></div>
-                      <span className="text-sm text-gray-600">{isRTL ? 'لم يبدأ' : 'Not Started'}</span>
+                      <div className="w-3 h-3 lg:w-4 lg:h-4 bg-gray-400 rounded"></div>
+                      <span className="text-xs lg:text-sm text-gray-600">{isRTL ? 'لم يبدأ' : 'Not Started'}</span>
                     </div>
                   </div>
                 </div>
@@ -501,21 +575,21 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           )}
 
           {activeTab === 'forms' && (
-            <div className="p-6">
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="p-4 lg:p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6 mb-4 lg:mb-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-6">
                   <h3 
-                    className="text-gray-800 font-bold"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                    className="text-gray-800 font-bold text-lg lg:text-xl"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'النماذج' : 'Forms'}
                   </h3>
-                  <button className="px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+                  <button className="px-3 lg:px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all text-sm lg:text-base">
                     {isRTL ? '+ إضافة نموذج' : '+ Add Form'}
                   </button>
                 </div>
-                {/* Forms Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Forms Grid - Mobile Single Column */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
                   {[
                     { name: 'Progress Report Form', nameAr: 'نموذج تقرير التقدم', icon: '📄', submissions: 12, lastUpdated: '2 days ago', lastUpdatedAr: 'منذ يومين' },
                     { name: 'Site Visit Form', nameAr: 'نموذج زيارة الموقع', icon: '🏗️', submissions: 8, lastUpdated: '1 week ago', lastUpdatedAr: 'منذ أسبوع' },
@@ -524,17 +598,17 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                     { name: 'Safety Inspection Form', nameAr: 'نموذج فحص السلامة', icon: '🛡️', submissions: 6, lastUpdated: '1 week ago', lastUpdatedAr: 'منذ أسبوع' },
                     { name: 'Completion Certificate', nameAr: 'شهادة الإنجاز', icon: '🎓', submissions: 3, lastUpdated: '2 weeks ago', lastUpdatedAr: 'منذ أسبوعين' },
                   ].map((form, idx) => (
-                    <div key={idx} className="bg-gray-50 rounded-xl p-5 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
-                      <div className="flex items-start gap-4">
-                        <div className="text-4xl">{form.icon}</div>
+                    <div key={idx} className="bg-gray-50 rounded-xl p-4 lg:p-5 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+                      <div className="flex items-start gap-3 lg:gap-4">
+                        <div className="text-2xl lg:text-4xl">{form.icon}</div>
                         <div className="flex-1">
                           <h4 
-                            className="text-gray-800 font-semibold mb-2"
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                            className="text-gray-800 font-semibold mb-2 text-sm lg:text-base"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? form.nameAr : form.name}
                           </h4>
-                          <div className="flex items-center justify-between text-sm text-gray-600">
+                          <div className="flex items-center justify-between text-xs lg:text-sm text-gray-600">
                             <span>{isRTL ? `${form.submissions} تقديم` : `${form.submissions} submissions`}</span>
                             <span>{isRTL ? form.lastUpdatedAr : form.lastUpdated}</span>
                           </div>
@@ -548,21 +622,21 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
           )}
 
           {activeTab === 'projectStory' && (
-            <div className="p-6">
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="p-4 lg:p-6">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-6">
                   <h3 
-                    className="text-gray-800 font-bold"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '20px', fontWeight: 700 }}
+                    className="text-gray-800 font-bold text-lg lg:text-xl"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'قصة المشروع' : 'Project Story'}
                   </h3>
-                  <button className="px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+                  <button className="px-3 lg:px-4 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl hover:shadow-lg transition-all text-sm lg:text-base">
                     {isRTL ? '+ إضافة قصة' : '+ Add Story'}
                   </button>
                 </div>
-                {/* Project Story Timeline */}
-                <div className="space-y-6">
+                {/* Project Story Timeline - Mobile Optimized */}
+                <div className="space-y-4 lg:space-y-6">
                   {[
                     {
                       date: 'January 15, 2025',
@@ -598,20 +672,20 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                       type: 'update'
                     },
                   ].map((story, idx) => (
-                    <div key={idx} className="flex gap-4">
+                    <div key={idx} className="flex gap-3 lg:gap-4">
                       <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                        <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
                           {idx + 1}
                         </div>
                         {idx < 2 && (
                           <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
                         )}
                       </div>
-                      <div className="flex-1 pb-6">
-                        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-gray-500">{isRTL ? story.dateAr : story.date}</span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      <div className="flex-1 pb-4 lg:pb-6">
+                        <div className="bg-gray-50 rounded-xl p-4 lg:p-5 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2 lg:mb-3">
+                            <span className="text-xs lg:text-sm text-gray-500">{isRTL ? story.dateAr : story.date}</span>
+                            <span className={`px-2 lg:px-3 py-1 rounded-full text-xs font-semibold ${
                               story.type === 'milestone' ? 'bg-blue-100 text-blue-700' :
                               story.type === 'achievement' ? 'bg-green-100 text-green-700' :
                               'bg-yellow-100 text-yellow-700'
@@ -622,19 +696,19 @@ const ProjectPhasesScreen = ({ onBack, onNavigate, onLogout, language, onLanguag
                             </span>
                           </div>
                           <h4 
-                            className="text-gray-800 font-bold mb-2"
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px' }}
+                            className="text-gray-800 font-bold mb-2 text-base lg:text-lg"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? story.titleAr : story.title}
                           </h4>
                           <p 
-                            className="text-gray-600 mb-3"
-                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                            className="text-gray-600 mb-2 lg:mb-3 text-sm lg:text-base"
+                            style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? story.descriptionAr : story.description}
                           </p>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="flex items-center gap-2 text-xs lg:text-sm text-gray-500">
+                            <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span>{isRTL ? story.authorAr : story.author}</span>
