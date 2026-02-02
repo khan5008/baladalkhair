@@ -15,6 +15,9 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedProjectType, setSelectedProjectType] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleLanguage = () => {
@@ -188,24 +191,34 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar with Green Gradient */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar with Green Gradient - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Balad Alkhair Society Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        {/* Menu Items - No Scrollbar */}
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {/* Menu Items - Mobile Optimized */}
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`
             nav::-webkit-scrollbar {
               display: none;
@@ -219,6 +232,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -240,18 +254,18 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id || (item.submenu && (activeMenu === 'finance' || activeMenu === 'whatsapp-templates' || activeMenu === 'send-message') && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -265,13 +279,14 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -282,12 +297,12 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -299,7 +314,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
         </nav>
 
         {/* Footer */}
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -307,26 +322,39 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Back Button */}
+            <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <h1 
-              className="text-gray-800"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+              className="text-gray-800 text-base lg:text-lg font-semibold"
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
               {isRTL ? 'جميع المشاريع' : 'All Projects'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -336,7 +364,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -344,20 +372,106 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
-            <div className="flex items-center gap-3 px-4 py-2 text-gray-600">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                A
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">{isRTL ? 'مدير' : 'Administrator'}</span>
-              </div>
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <div className="hidden lg:flex flex-col">
+                  <span className="text-xs text-gray-500">{isRTL ? 'مدير' : 'Administrator'}</span>
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Search and Filter Section */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-3">
+        {/* Search and Filter Section - Mobile Responsive */}
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 shadow-sm sticky top-16 lg:top-20 z-20">
+          {/* Mobile Search Bar */}
+          <div className="lg:hidden mb-3">
+            <div className={`relative`}>
+              <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isRTL ? "البحث عن اسم المشروع..." : "Search project name..."}
+                className={`w-full ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-sm`}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Filter Toggle */}
+          <div className="lg:hidden flex items-center justify-between mb-3">
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+              </svg>
+              <span className="text-sm font-medium">{isRTL ? 'الفلاتر' : 'Filters'}</span>
+              <svg className={`w-4 h-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div className="flex gap-2">
+              <button className="px-3 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm">
+                {isRTL ? 'فلتر' : 'Filter'}
+              </button>
+              <button className="px-3 py-2 bg-white text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:border-gray-400 transition-all duration-200 text-sm">
+                {isRTL ? 'إعادة تعيين' : 'Reset'}
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden lg:flex flex-wrap items-center gap-3">
             {/* Left Side - Search and Dropdowns */}
             <div className="flex flex-wrap items-center gap-3 flex-1">
               {/* Search Bar */}
@@ -434,11 +548,65 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
               </button>
             </div>
           </div>
+
+          {/* Mobile Collapsible Filters */}
+          {filtersOpen && (
+            <div className="lg:hidden space-y-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-1 gap-3">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                >
+                  <option value="">{isRTL ? 'اختر الفئة' : 'Select Category'}</option>
+                  <option value="wells">{isRTL ? 'الآبار' : 'Wells'}</option>
+                  <option value="aqiqah">{isRTL ? 'عقيقة' : 'Aqiqah'}</option>
+                  <option value="iftar">{isRTL ? 'إفطار' : 'Iftar'}</option>
+                </select>
+
+                <select
+                  value={selectedSubcategory}
+                  onChange={(e) => setSelectedSubcategory(e.target.value)}
+                  className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                >
+                  <option value="">{isRTL ? 'اختر الفئة الفرعية' : 'Select Subcategory'}</option>
+                </select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <select
+                    value={selectedProjectType}
+                    onChange={(e) => setSelectedProjectType(e.target.value)}
+                    className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                  >
+                    <option value="">{isRTL ? 'نوع المشروع' : 'Project Type'}</option>
+                    <option value="public">{isRTL ? 'عام' : 'Public'}</option>
+                    <option value="private">{isRTL ? 'خاص' : 'Private'}</option>
+                  </select>
+
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#67AF31] focus:border-[#67AF31] outline-none transition-all bg-white text-gray-700 text-sm"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px' }}
+                  >
+                    <option value="">{isRTL ? 'البلد' : 'Country'}</option>
+                    <option value="kuwait">{isRTL ? 'الكويت' : 'Kuwait'}</option>
+                    <option value="gaza">{isRTL ? 'غزة' : 'Gaza'}</option>
+                    <option value="india">{isRTL ? 'الهند' : 'India'}</option>
+                    <option value="niger">{isRTL ? 'النيجر' : 'Niger'}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Projects Grid */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6" style={{ background: 'linear-gradient(to bottom, #f9fafb 0%, #f3f4f6 100%)' }}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Projects Grid - Mobile Responsive */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6" style={{ background: 'linear-gradient(to bottom, #f9fafb 0%, #f3f4f6 100%)' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
             {projects.map((project) => (
               <div 
                 key={project.id} 
@@ -448,7 +616,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 }}
               >
                 {/* Project Image */}
-                <div className="relative h-44 overflow-hidden bg-gray-200">
+                <div className="relative h-36 lg:h-44 overflow-hidden bg-gray-200">
                   <img 
                     src={project.image} 
                     alt={project.title}
@@ -461,7 +629,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                   <div className="absolute top-2 left-2 right-2 flex items-start justify-between gap-2 z-10">
                     {/* Status Badge */}
                     <span 
-                      className={`px-2 py-1 rounded-md text-[10px] font-bold text-white shadow-lg backdrop-blur-sm ${
+                      className={`px-2 py-1 rounded-md text-[9px] lg:text-[10px] font-bold text-white shadow-lg backdrop-blur-sm ${
                         project.statusColor === 'gray' 
                           ? 'bg-gray-600/90' 
                           : 'bg-purple-600/90'
@@ -478,7 +646,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     {/* Code Badge */}
                     <div className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md border border-white/50 shadow-lg">
                       <span 
-                        className="text-[10px] font-bold text-gray-800"
+                        className="text-[9px] lg:text-[10px] font-bold text-gray-800"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
                           lineHeight: '1.2'
@@ -492,7 +660,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                   {/* Category Badge - Bottom */}
                   <div className="absolute bottom-2 right-2 z-10">
                     <span 
-                      className="px-2 py-1 bg-white/95 backdrop-blur-sm rounded-md text-[10px] font-bold text-gray-800 shadow-lg border border-white/50"
+                      className="px-2 py-1 bg-white/95 backdrop-blur-sm rounded-md text-[9px] lg:text-[10px] font-bold text-gray-800 shadow-lg border border-white/50"
                       style={{ 
                         fontFamily: 'Tajawal, ui-sans-serif, system-ui',
                         lineHeight: '1.2'
@@ -504,13 +672,13 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 </div>
 
                 {/* Project Details */}
-                <div className="p-4 bg-white">
+                <div className="p-3 lg:p-4 bg-white">
                   {/* Title */}
                   <h3 
-                    className="text-gray-800 leading-snug mb-3 line-clamp-2 min-h-[3rem]" 
+                    className="text-gray-800 leading-snug mb-2 lg:mb-3 line-clamp-2 min-h-[2.5rem] lg:min-h-[3rem]" 
                     style={{ 
                       fontFamily: 'Tajawal, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
-                      fontSize: '15px',
+                      fontSize: '14px',
                       fontWeight: 500,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -522,13 +690,13 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                   </h3>
 
                   {/* Details Grid */}
-                  <div className="space-y-2.5 mb-4">
+                  <div className="space-y-2 lg:space-y-2.5 mb-3 lg:mb-4">
                     <div className="flex items-center justify-between gap-2">
                       <span 
                         className="text-gray-500 text-xs whitespace-nowrap"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 400
                         }}
                       >
@@ -538,7 +706,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="text-gray-800 font-semibold text-xs truncate ml-2"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 600
                         }}
                       >
@@ -551,7 +719,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="text-gray-500 text-xs whitespace-nowrap flex-shrink-0"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 400
                         }}
                       >
@@ -564,7 +732,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         rel="noopener noreferrer"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 400,
                           wordBreak: 'break-all'
                         }}
@@ -578,7 +746,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="text-gray-500 text-xs whitespace-nowrap"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 400
                         }}
                       >
@@ -588,7 +756,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="px-2 py-0.5 bg-green-50 text-green-700 rounded-md text-xs font-medium border border-green-200"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 500
                         }}
                       >
@@ -601,7 +769,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="text-gray-500 text-xs whitespace-nowrap"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 400
                         }}
                       >
@@ -611,7 +779,7 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         className="text-gray-800 text-xs font-medium truncate ml-2"
                         style={{ 
                           fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           fontWeight: 500
                         }}
                       >
@@ -628,10 +796,10 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                           onNavigate('projectDetails', { projectId: project.id });
                         }
                       }}
-                      className="flex-1 px-3 py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-lg hover:from-[#4d8a24] hover:to-[#67AF31] transition-all duration-200 text-xs shadow-md hover:shadow-lg"
+                      className="flex-1 px-2 lg:px-3 py-1.5 lg:py-2 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-lg hover:from-[#4d8a24] hover:to-[#67AF31] transition-all duration-200 text-xs shadow-md hover:shadow-lg"
                       style={{ 
                         fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                        fontSize: '13px',
+                        fontSize: '12px',
                         fontWeight: 600
                       }}
                     >
@@ -643,10 +811,10 @@ const AllProjectsScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                           onNavigate('projectDetails', { projectId: project.id });
                         }
                       }}
-                      className="flex-1 px-3 py-2 bg-white text-gray-700 font-semibold rounded-lg border-2 border-gray-200 hover:border-[#67AF31] hover:text-[#67AF31] transition-all duration-200 text-xs"
+                      className="flex-1 px-2 lg:px-3 py-1.5 lg:py-2 bg-white text-gray-700 font-semibold rounded-lg border-2 border-gray-200 hover:border-[#67AF31] hover:text-[#67AF31] transition-all duration-200 text-xs"
                       style={{ 
                         fontFamily: 'Tajawal, ui-sans-serif, system-ui',
-                        fontSize: '13px',
+                        fontSize: '12px',
                         fontWeight: 600
                       }}
                     >

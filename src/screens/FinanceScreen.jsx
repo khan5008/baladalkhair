@@ -5,6 +5,8 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
   const [activeMenu, setActiveMenu] = useState('finance');
   const [expandedMenus, setExpandedMenus] = useState({ thirdParty: true });
   const [activeTab, setActiveTab] = useState('revenues');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleMenu = (menuId) => {
@@ -182,22 +184,32 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`nav::-webkit-scrollbar { display: none; }`}</style>
           {menuItems.map((item) => (
             <div key={item.id}>
@@ -207,6 +219,7 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -224,18 +237,18 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id || (item.submenu && activeMenu === 'finance' && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -249,13 +262,14 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'whatsapp-templates') {
                             onNavigate('whatsapp-templates');
@@ -264,12 +278,12 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -280,7 +294,7 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
           ))}
         </nav>
 
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>

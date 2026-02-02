@@ -31,3 +31,13 @@ html[dir="ltr"] {
   -webkit-line-clamp: 3;
 }
 
+/* Scrollbar hide utility for mobile tab scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

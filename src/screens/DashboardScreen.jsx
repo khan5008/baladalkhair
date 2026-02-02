@@ -8,6 +8,8 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
     communication: false,
     thirdParty: false,
   });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleMenu = (menu) => {
@@ -59,24 +61,34 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar with Green Gradient */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar with Green Gradient - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Balad Alkhair Society Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        {/* Menu Items - No Scrollbar */}
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {/* Menu Items - Mobile Optimized */}
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`
             nav::-webkit-scrollbar {
               display: none;
@@ -90,6 +102,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'projects') {
                         onNavigate('projects');
@@ -109,18 +122,18 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-1 rounded-lg ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 rounded-lg ${
                   activeMenu === item.id || (item.submenu && (activeMenu === 'finance' || activeMenu === 'whatsapp-templates' || activeMenu === 'send-message') && expandedMenus[item.id])
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                     </svg>
-                    <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                    <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                   </div>
                 {item.submenu && (
                   <svg 
@@ -141,6 +154,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                        onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -151,12 +165,12 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-lg ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -168,7 +182,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
         </nav>
 
         {/* Footer */}
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -176,26 +190,39 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Menu Button (hidden on mobile) */}
+            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors hidden lg:block">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <h1 
-              className="text-gray-800"
-              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+              className="text-gray-800 text-base lg:text-lg font-semibold"
+              style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
               {isRTL ? 'لوحة التحكم' : 'Dashboard'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -205,7 +232,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -213,20 +240,62 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
-            <div className="flex items-center gap-3 px-4 py-2 text-gray-600">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                A
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">{isRTL ? 'مدير' : 'Administrator'}</span>
-              </div>
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <div className="hidden lg:flex flex-col">
+                  <span className="text-xs text-gray-500">{isRTL ? 'مدير' : 'Administrator'}</span>
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Tab Buttons */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-          <div className="flex gap-3">
+        {/* Mobile Scrollable Tab Bar */}
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 shadow-sm sticky top-16 lg:top-20 z-20">
+          <div className="flex gap-2 lg:gap-3 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -255,26 +324,26 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     }
                   }
                 }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-200 font-medium ${
+                className={`flex items-center gap-2 px-4 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-all duration-200 font-medium whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white shadow-lg shadow-[#67AF31]/30'
                     : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200'
                 }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
                 </svg>
-                <span>{isRTL ? tab.labelAr : tab.label}</span>
+                <span className="text-sm lg:text-base">{isRTL ? tab.labelAr : tab.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* First Row: KPI Cards (6 cards) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {/* Scrollable Content Area - Mobile Optimized */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
+          <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6">
+            {/* KPI Cards - Mobile Single Column */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 lg:gap-4">
               {[
                 { label: 'Approved Budget', labelAr: 'الميزانية المعتمدة', value: '5000', unit: 'SAR', unitAr: 'ريال سعودي', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: 'blue' },
                 { label: 'Actual Expense', labelAr: 'المصروف الفعلي', value: '93,500', subtitle: '62% of Budget', subtitleAr: '62% من الميزانية', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'red' },
@@ -285,18 +354,18 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
               ].map((kpi, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-white rounded-xl shadow-md p-5 border border-gray-100 hover:shadow-lg transition-shadow duration-200"
+                  className="bg-white rounded-xl shadow-md p-4 lg:p-5 border border-gray-100 hover:shadow-lg transition-shadow duration-200"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2 lg:mb-3">
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{isRTL ? kpi.labelAr : kpi.label}</span>
-                    <div className={`p-2 rounded-lg ${
+                    <div className={`p-1.5 lg:p-2 rounded-lg ${
                       kpi.color === 'blue' ? 'bg-blue-100' :
                       kpi.color === 'red' ? 'bg-red-100' :
                       kpi.color === 'green' ? 'bg-green-100' :
                       kpi.color === 'purple' ? 'bg-purple-100' :
                       'bg-yellow-100'
                     }`}>
-                      <svg className={`w-5 h-5 ${
+                      <svg className={`w-4 h-4 lg:w-5 lg:h-5 ${
                         kpi.color === 'blue' ? 'text-blue-600' :
                         kpi.color === 'red' ? 'text-red-600' :
                         kpi.color === 'green' ? 'text-green-600' :
@@ -307,7 +376,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                       </svg>
                     </div>
                   </div>
-                  <div className={`text-2xl font-bold mb-1 ${
+                  <div className={`text-xl lg:text-2xl font-bold mb-1 ${
                     kpi.color === 'red' ? 'text-red-600' :
                     kpi.color === 'green' ? 'text-green-600' :
                     kpi.color === 'purple' ? 'text-purple-600' :
@@ -316,75 +385,77 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     {isRTL && kpi.valueAr ? kpi.valueAr : kpi.value} {kpi.unit && <span className="text-sm font-normal text-gray-500">{isRTL && kpi.unitAr ? kpi.unitAr : kpi.unit}</span>}
                   </div>
                   {kpi.subtitle && (
-                    <p className="text-xs text-gray-500 mt-2">{isRTL && kpi.subtitleAr ? kpi.subtitleAr : kpi.subtitle}</p>
+                    <p className="text-xs text-gray-500 mt-1 lg:mt-2">{isRTL && kpi.subtitleAr ? kpi.subtitleAr : kpi.subtitle}</p>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Second Row: Charts - Monthly Expenses and Spending Distribution */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Monthly Expenses - Bar Chart */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            {/* Charts - Mobile Stacked Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+              {/* Monthly Expenses - Mobile Scrollable */}
+              <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="mb-6 text-gray-800"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                  className="mb-4 lg:mb-6 text-gray-800 text-base lg:text-lg font-semibold"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'المصروفات الشهرية' : 'Monthly Expenses'}
                 </h3>
-                <div className="h-72 relative flex items-end justify-between gap-2 px-4 pb-8">
-                  {Array.from({ length: 12 }).map((_, i) => {
-                    // Data values for each month (in thousands)
-                    const monthlyData = [
-                      { value1: 45, value2: 25 }, { value1: 52, value2: 30 }, { value1: 48, value2: 28 },
-                      { value1: 60, value2: 35 }, { value1: 55, value2: 32 }, { value1: 58, value2: 34 },
-                      { value1: 50, value2: 29 }, { value1: 54, value2: 31 }, { value1: 49, value2: 27 },
-                      { value1: 62, value2: 36 }, { value1: 57, value2: 33 }, { value1: 59, value2: 35 }
-                    ];
-                    const { value1, value2 } = monthlyData[i] || { value1: 50, value2: 30 };
-                    const totalValue = value1 + value2;
-                    const maxValue = 100; // Maximum value for scaling
-                    
-                    // Calculate heights as percentage of max value, ensuring minimum visibility
-                    const barHeight1 = Math.max((value1 / maxValue) * 100, 20);
-                    const barHeight2 = Math.max((value2 / maxValue) * 100, 15);
-                    
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative h-full">
-                        <div className="w-full h-full flex flex-col justify-end gap-0.5 relative overflow-visible cursor-pointer transition-all duration-300 group-hover:scale-105">
-                          <div 
-                            className="w-full bg-gradient-to-t from-[#67AF31] via-[#7CB342] to-[#8BC34A] rounded-t-lg shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:from-[#4d8a24] group-hover:via-[#67AF31] group-hover:to-[#7CB342]"
-                            style={{ height: `${barHeight1}%`, minHeight: '40px' }}
-                          />
-                          <div 
-                            className="w-full bg-gradient-to-t from-[#8BC34A] via-[#9CCC65] to-[#AED581] rounded-b-lg shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:from-[#7CB342] group-hover:via-[#8BC34A] group-hover:to-[#9CCC65]"
-                            style={{ height: `${barHeight2}%`, minHeight: '25px' }}
-                          />
-                          {/* Tooltip on hover */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10 shadow-xl">
-                            {isRTL ? monthsAr[i] : months[i]}: ${totalValue}K
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                <div className="h-64 lg:h-72 relative overflow-x-auto">
+                  <div className="min-w-[600px] lg:min-w-0 h-full flex items-end justify-between gap-2 px-4 pb-8">
+                    {Array.from({ length: 12 }).map((_, i) => {
+                      // Data values for each month (in thousands)
+                      const monthlyData = [
+                        { value1: 45, value2: 25 }, { value1: 52, value2: 30 }, { value1: 48, value2: 28 },
+                        { value1: 60, value2: 35 }, { value1: 55, value2: 32 }, { value1: 58, value2: 34 },
+                        { value1: 50, value2: 29 }, { value1: 54, value2: 31 }, { value1: 49, value2: 27 },
+                        { value1: 62, value2: 36 }, { value1: 57, value2: 33 }, { value1: 59, value2: 35 }
+                      ];
+                      const { value1, value2 } = monthlyData[i] || { value1: 50, value2: 30 };
+                      const totalValue = value1 + value2;
+                      const maxValue = 100; // Maximum value for scaling
+                      
+                      // Calculate heights as percentage of max value, ensuring minimum visibility
+                      const barHeight1 = Math.max((value1 / maxValue) * 100, 20);
+                      const barHeight2 = Math.max((value2 / maxValue) * 100, 15);
+                      
+                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative h-full">
+                          <div className="w-full h-full flex flex-col justify-end gap-0.5 relative overflow-visible cursor-pointer transition-all duration-300 group-hover:scale-105">
+                            <div 
+                              className="w-full bg-gradient-to-t from-[#67AF31] via-[#7CB342] to-[#8BC34A] rounded-t-lg shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:from-[#4d8a24] group-hover:via-[#67AF31] group-hover:to-[#7CB342]"
+                              style={{ height: `${barHeight1}%`, minHeight: '40px' }}
+                            />
+                            <div 
+                              className="w-full bg-gradient-to-t from-[#8BC34A] via-[#9CCC65] to-[#AED581] rounded-b-lg shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:from-[#7CB342] group-hover:via-[#8BC34A] group-hover:to-[#9CCC65]"
+                              style={{ height: `${barHeight2}%`, minHeight: '25px' }}
+                            />
+                            {/* Tooltip on hover */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10 shadow-xl">
+                              {isRTL ? monthsAr[i] : months[i]}: ${totalValue}K
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                            </div>
                           </div>
+                          <span className="text-xs font-semibold text-gray-600 group-hover:text-[#67AF31] transition-colors mt-1 whitespace-nowrap">{['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'][i]}</span>
                         </div>
-                        <span className="text-xs font-semibold text-gray-600 group-hover:text-[#67AF31] transition-colors mt-1 whitespace-nowrap">{['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'][i]}</span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              {/* Spending Distribution - Donut Chart */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+              {/* Spending Distribution - Mobile Centered */}
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
                 <h3 
-                  className="mb-6 text-gray-800"
-                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                  className="mb-4 lg:mb-6 text-gray-800 text-base lg:text-lg font-semibold"
+                  style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'توزيع الإنفاق' : 'Spending Distribution'}
                 </h3>
-                <div className="flex items-center justify-center h-72">
-                  <div className="relative w-56 h-56">
+                <div className="flex items-center justify-center h-48 lg:h-72">
+                  <div className="relative w-40 h-40 lg:w-56 lg:h-56">
                     <svg className="transform -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="12" />
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#67AF31" strokeWidth="12" strokeDasharray={`${60 * 3.14159} ${100 * 3.14159}`} strokeDashoffset="0" />
@@ -393,32 +464,32 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     </svg>
                   </div>
                 </div>
-                <div className="space-y-3 mt-6">
+                <div className="space-y-2 lg:space-y-3 mt-4 lg:mt-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-[#67AF31] rounded"></div>
-                    <span className="text-sm font-medium text-gray-700">{isRTL ? 'العمليات' : 'Operations'}</span>
+                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-[#67AF31] rounded"></div>
+                    <span className="text-xs lg:text-sm font-medium text-gray-700">{isRTL ? 'العمليات' : 'Operations'}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                    <span className="text-sm font-medium text-gray-700">{isRTL ? 'اللوجستيات' : 'Logistics'}</span>
+                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-orange-500 rounded"></div>
+                    <span className="text-xs lg:text-sm font-medium text-gray-700">{isRTL ? 'اللوجستيات' : 'Logistics'}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-red-500 rounded"></div>
-                    <span className="text-sm font-medium text-gray-700">{isRTL ? 'النفقات العامة' : 'General Expenses'}</span>
+                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-red-500 rounded"></div>
+                    <span className="text-xs lg:text-sm font-medium text-gray-700">{isRTL ? 'النفقات العامة' : 'General Expenses'}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Third Row: Cumulative Donations Chart - Full Width */}
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            {/* Cumulative Donations Chart - Mobile Full Width */}
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
               <h3 
-                className="mb-4 text-gray-800"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                className="mb-3 lg:mb-4 text-gray-800 text-base lg:text-lg font-semibold"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'التبرعات التراكمية' : 'Cumulative Donations'}
               </h3>
-              <div className="h-64 relative">
+              <div className="h-48 lg:h-64 relative">
                 <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="donationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -454,17 +525,17 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                   <circle cx="400" cy="80" r="6" fill="white" />
                 </svg>
               </div>
-              <p className="text-sm text-gray-500 mt-4">{isRTL ? 'بناءً على التبرعات المكتملة فقط.' : 'Based on completed donations only.'}</p>
+              <p className="text-xs lg:text-sm text-gray-500 mt-3 lg:mt-4">{isRTL ? 'بناءً على التبرعات المكتملة فقط.' : 'Based on completed donations only.'}</p>
             </div>
 
-            {/* Fourth Row: Three Cards - Latest Transactions, Documents, Tasks */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Information Cards - Mobile Single Column */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
               {/* Latest Transactions */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-5">
                   <h3 
-                    className="text-gray-800"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                    className="text-gray-800 text-base lg:text-lg font-semibold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'أحدث المعاملات' : 'Latest Transactions'}
                   </h3>
@@ -475,20 +546,20 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     {isRTL ? 'عرض الكل' : 'View All'}
                   </button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'nil', date: '09/01/2026', amount: '2 KWD' },
                     { name: 'nil', date: '08/01/2026', amount: '1 KWD' },
                     { name: 'nil', date: '08/01/2026', amount: '1 KWD' },
                   ].map((transaction, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div key={i} className="flex items-center justify-between py-2 lg:py-3 border-b border-gray-100 last:border-0">
                       <div>
                         <p className="text-sm font-semibold text-gray-800">{transaction.name}</p>
                         <p className="text-xs text-gray-500 mt-1">{transaction.date}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-bold text-gray-800">{transaction.amount}</p>
-                        <span className="inline-block px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full mt-1">{isRTL ? 'مدفوع' : 'Paid'}</span>
+                        <span className="inline-block px-2 lg:px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full mt-1">{isRTL ? 'مدفوع' : 'Paid'}</span>
                       </div>
                     </div>
                   ))}
@@ -496,11 +567,11 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
               </div>
 
               {/* Latest Documents */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-5">
                   <h3 
-                    className="text-gray-800"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                    className="text-gray-800 text-base lg:text-lg font-semibold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'أحدث المستندات' : 'Latest Documents'}
                   </h3>
@@ -511,20 +582,20 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                     {isRTL ? 'عرض الكل' : 'View All'}
                   </button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'Monthly Progress Report', nameAr: 'تقرير التقدم الشهري', date: '24 2025 يونيو', dateEn: 'June 24, 2025', color: 'red' },
                     { name: 'Site Photos', nameAr: 'صور الموقع', date: '23 2025 يونيو', dateEn: 'June 23, 2025', color: 'blue' },
                     { name: 'Completion Certificate', nameAr: 'شهادة الإنجاز', date: '22 2025', dateEn: 'June 22, 2025', color: 'green' },
                   ].map((doc, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div key={i} className="flex items-center justify-between py-2 lg:py-3 border-b border-gray-100 last:border-0">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center ${
+                        <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg border-2 flex items-center justify-center ${
                           doc.color === 'red' ? 'border-red-500' :
                           doc.color === 'blue' ? 'border-blue-500' :
                           'border-green-500'
                         }`}>
-                          <span className={`text-sm font-bold ${
+                          <span className={`text-xs lg:text-sm font-bold ${
                             doc.color === 'red' ? 'text-red-500' :
                             doc.color === 'blue' ? 'text-blue-500' :
                             'text-green-500'
@@ -536,7 +607,7 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                         </div>
                       </div>
                       <button className="text-[#67AF31] hover:text-[#8BC34A] transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
@@ -547,28 +618,28 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
               </div>
 
               {/* Due Tasks */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-5">
                   <h3 
-                    className="text-gray-800"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                    className="text-gray-800 text-base lg:text-lg font-semibold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'المهام المستحقة' : 'Due Tasks'}
                   </h3>
                   <a href="#" className="text-sm font-semibold text-[#67AF31] hover:text-[#8BC34A] transition-colors">{isRTL ? 'عرض الكل' : 'View All'}</a>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'Monthly Progress Report', nameAr: 'تقرير التقدم الشهري', assignee: 'Ahmed Mohammed', assigneeAr: 'أحمد محمد', date: '26 2025 يونيو', dateEn: 'June 26, 2025', status: 'Overdue', statusAr: 'متأخر', color: 'red' },
                     { name: 'Add New Field Visit', nameAr: 'إضافة زيارة ميدانية جديدة', assignee: 'Sara Ahmed', assigneeAr: 'سارة أحمد', date: '28 يونيو 2025', dateEn: 'June 28, 2025', status: 'Upcoming', statusAr: 'قريباً', color: 'yellow' },
                     { name: 'Add Task', nameAr: 'إضافة مهمة', assignee: 'Mohammed Ali', assigneeAr: 'محمد علي', date: '30 يونيو 2025', dateEn: 'June 30, 2025', status: 'Scheduled', statusAr: 'مجدول', color: 'blue' },
                   ].map((task, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div key={i} className="flex items-center justify-between py-2 lg:py-3 border-b border-gray-100 last:border-0">
                       <div>
                         <p className="text-sm font-semibold text-gray-800">{isRTL ? task.nameAr : task.name}</p>
                         <p className="text-xs text-gray-500 mt-1">{isRTL ? task.assigneeAr : task.assignee} • {isRTL ? task.date : task.dateEn}</p>
                       </div>
-                      <span className={`inline-block px-3 py-1 text-white text-xs font-semibold rounded-full ${
+                      <span className={`inline-block px-2 lg:px-3 py-1 text-white text-xs font-semibold rounded-full ${
                         task.color === 'red' ? 'bg-red-500' :
                         task.color === 'yellow' ? 'bg-yellow-500' :
                         'bg-blue-500'
@@ -579,35 +650,35 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
               </div>
             </div>
 
-            {/* Fifth Row: Reports Section - Two Cards Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Reports Section - Mobile Single Column */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               {/* Implementing Agency Reports */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-5">
                   <h3 
-                    className="text-gray-800"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                    className="text-gray-800 text-base lg:text-lg font-semibold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     تقارير الوكالة المنفذة
                   </h3>
                   <a href="#" className="text-sm font-semibold text-[#67AF31] hover:text-[#8BC34A] transition-colors">عرض الكل</a>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'تقرير التقدم الشهري', date: 'أغسطس 2025', sentDate: 'تم الإرسال 14 أغسطس', icon: 'document', iconColor: 'red' },
                     { name: 'تقرير التقدم الشهري', subtitle: 'المرحلة الثالثة', date: 'أغسطس 2025', sentDate: 'تم الإرسال 10 أغسطس', icon: 'chart', iconColor: 'blue' },
                   ].map((report, i) => (
-                    <div key={i} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    <div key={i} className="flex items-center justify-between py-3 lg:py-4 border-b border-gray-100 last:border-0">
+                      <div className="flex items-center gap-3 lg:gap-4">
+                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
                           report.iconColor === 'red' ? 'bg-red-100' : 'bg-blue-100'
                         }`}>
                           {report.icon === 'document' ? (
-                            <svg className={`w-6 h-6 ${report.iconColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 lg:w-6 lg:h-6 ${report.iconColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                           ) : (
-                            <svg className={`w-6 h-6 ${report.iconColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 lg:w-6 lg:h-6 ${report.iconColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                           )}
@@ -618,39 +689,39 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                           <p className="text-xs text-gray-500 mt-1">{report.date}</p>
                         </div>
                       </div>
-                      <span className="px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full whitespace-nowrap">{report.sentDate}</span>
+                      <span className="px-2 lg:px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full whitespace-nowrap">{report.sentDate}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Reports Sent to Donors */}
-              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 lg:mb-5">
                   <h3 
-                    className="text-gray-800"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '18px', fontWeight: 600 }}
+                    className="text-gray-800 text-base lg:text-lg font-semibold"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     التقارير المرسلة للمانحين
                   </h3>
                   <a href="#" className="text-sm font-semibold text-[#67AF31] hover:text-[#8BC34A] transition-colors">عرض الكل</a>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   {[
                     { name: 'النشرة الشهرية', description: 'تحديثات المشروع - أغسطس', sentDate: 'تم الإرسال 15 أغسطس', icon: 'envelope', iconColor: 'purple' },
                     { name: 'تقرير الأثر الاجتماعي', description: 'قصص المستفيدين', sentDate: 'تم الإرسال 12 أغسطس', icon: 'folder', iconColor: 'orange' },
                   ].map((report, i) => (
-                    <div key={i} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    <div key={i} className="flex items-center justify-between py-3 lg:py-4 border-b border-gray-100 last:border-0">
+                      <div className="flex items-center gap-3 lg:gap-4">
+                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
                           report.iconColor === 'purple' ? 'bg-purple-100' : 'bg-orange-100'
                         }`}>
                           {report.icon === 'envelope' ? (
-                            <svg className={`w-6 h-6 ${report.iconColor === 'purple' ? 'text-purple-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 lg:w-6 lg:h-6 ${report.iconColor === 'purple' ? 'text-purple-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                           ) : (
-                            <svg className={`w-6 h-6 ${report.iconColor === 'purple' ? 'text-purple-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 lg:w-6 lg:h-6 ${report.iconColor === 'purple' ? 'text-purple-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                             </svg>
                           )}
@@ -660,39 +731,39 @@ const DashboardScreen = ({ onNavigate, onLogout, language, onLanguageChange }) =
                           <p className="text-xs text-gray-500 mt-1">{report.description}</p>
                         </div>
                       </div>
-                      <span className="px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full whitespace-nowrap">{report.sentDate}</span>
+                      <span className="px-2 lg:px-3 py-1 bg-[#67AF31] text-white text-xs font-semibold rounded-full whitespace-nowrap">{report.sentDate}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
+            {/* Action Buttons - Mobile Responsive */}
+            <div className="flex flex-wrap gap-2 lg:gap-3">
               <button 
                 onClick={() => onNavigate && onNavigate('reports')}
-                className="px-6 py-3 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+                className="px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm lg:text-base"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'الجدول الزمني للأنشطة' : 'Activities Timeline'}
               </button>
               <button 
                 onClick={() => onNavigate && onNavigate('finance')}
-                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200"
+                className="px-4 lg:px-6 py-2 lg:py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200 text-sm lg:text-base"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'المالية' : 'Finance'}
               </button>
               <button 
                 onClick={() => onNavigate && onNavigate('documents')}
-                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200"
+                className="px-4 lg:px-6 py-2 lg:py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200 text-sm lg:text-base"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'المستندات' : 'Documents'}
               </button>
               <button 
                 onClick={() => onNavigate && onNavigate('governance')}
-                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200"
+                className="px-4 lg:px-6 py-2 lg:py-3 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-200 text-sm lg:text-base"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'الحوكمة' : 'Governance'}
