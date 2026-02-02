@@ -303,29 +303,43 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Back Button */}
+            <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'المالية' : 'Finance'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">
                 {isRTL ? 'إدارة المعاملات المالية والتبرعات' : 'Manage financial transactions and donations'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -335,7 +349,7 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -343,28 +357,75 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Stats Cards */}
-        <div className="bg-white border-b border-gray-200 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white border-b border-gray-200 p-4 lg:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 lg:gap-4">
+            <div className="bg-gray-50 rounded-lg p-3 lg:p-4 border border-gray-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gray-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-gray-600 text-sm font-medium"
+                    className="text-gray-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'الهدف' : 'TARGET'}
                   </p>
                   <p 
-                    className="text-gray-700 font-bold text-xl"
+                    className="text-gray-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     5,000
@@ -379,22 +440,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-green-50 rounded-lg p-3 lg:p-4 border border-green-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-green-600 text-sm font-medium"
+                    className="text-green-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'المحصل' : 'COLLECTED'}
                   </p>
                   <p 
-                    className="text-green-700 font-bold text-xl"
+                    className="text-green-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     96
@@ -409,22 +470,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-red-50 rounded-lg p-3 lg:p-4 border border-red-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-red-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-red-600 text-sm font-medium"
+                    className="text-red-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'الإنفاق الفعلي' : 'ACTUAL SPENDING'}
                   </p>
                   <p 
-                    className="text-red-700 font-bold text-xl"
+                    className="text-red-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     0
@@ -439,22 +500,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-yellow-50 rounded-lg p-3 lg:p-4 border border-yellow-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-yellow-600 text-sm font-medium"
+                    className="text-yellow-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'المتبقي' : 'REMAINING'}
                   </p>
                   <p 
-                    className="text-yellow-700 font-bold text-xl"
+                    className="text-yellow-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     4,904
@@ -469,22 +530,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-blue-50 rounded-lg p-3 lg:p-4 border border-blue-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-blue-600 text-sm font-medium"
+                    className="text-blue-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'الموضع النقدي' : 'CASH POSITION'}
                   </p>
                   <p 
-                    className="text-blue-700 font-bold text-xl"
+                    className="text-blue-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     96
@@ -499,22 +560,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-purple-50 rounded-lg p-3 lg:p-4 border border-purple-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-purple-600 text-sm font-medium"
+                    className="text-purple-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'معدل الإنفاق' : 'SPENDING RATE'}
                   </p>
                   <p 
-                    className="text-purple-700 font-bold text-xl"
+                    className="text-purple-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     0%
@@ -529,22 +590,22 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
               </div>
             </div>
 
-            <div className="bg-teal-50 rounded-lg p-4 border border-teal-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-teal-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-teal-50 rounded-lg p-3 lg:p-4 border border-teal-200">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-teal-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <p 
-                    className="text-teal-600 text-sm font-medium"
+                    className="text-teal-600 text-xs lg:text-sm font-medium"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'معدل القبول' : 'ACCEPTANCE RATE'}
                   </p>
                   <p 
-                    className="text-teal-700 font-bold text-xl"
+                    className="text-teal-700 font-bold text-lg lg:text-xl"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     80%
@@ -562,74 +623,74 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-b border-gray-200 px-6">
-          <div className="flex gap-6">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6">
+          <div className="flex gap-2 lg:gap-6 overflow-x-auto scrollbar-hide">
             <button 
               onClick={() => setActiveTab('objectives')}
-              className={`px-4 py-3 font-medium transition-colors ${
+              className={`px-3 lg:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm lg:text-base ${
                 activeTab === 'objectives' 
                   ? 'text-gray-600 border-b-2 border-gray-300' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               {isRTL ? 'الأهداف والضوابط' : 'Objectives and Controls'}
             </button>
             <button 
               onClick={() => setActiveTab('transactions')}
-              className={`px-4 py-3 font-medium transition-colors ${
+              className={`px-3 lg:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm lg:text-base ${
                 activeTab === 'transactions' 
                   ? 'text-gray-600 border-b-2 border-gray-300' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
               {isRTL ? 'المعاملات' : 'Transactions'}
             </button>
             <button 
               onClick={() => setActiveTab('revenues')}
-              className={`px-4 py-3 font-medium transition-colors ${
+              className={`px-3 lg:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm lg:text-base ${
                 activeTab === 'revenues' 
                   ? 'text-[#67AF31] border-b-2 border-[#67AF31]' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
               {isRTL ? 'الإيرادات' : 'Revenues'}
             </button>
             <button 
               onClick={() => setActiveTab('payments')}
-              className={`px-4 py-3 font-medium transition-colors ${
+              className={`px-3 lg:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm lg:text-base ${
                 activeTab === 'payments' 
                   ? 'text-gray-600 border-b-2 border-gray-300' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
               {isRTL ? 'المدفوعات' : 'Payments'}
             </button>
             <button 
               onClick={() => setActiveTab('reports')}
-              className={`px-4 py-3 font-medium transition-colors ${
+              className={`px-3 lg:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm lg:text-base ${
                 activeTab === 'reports' 
                   ? 'text-gray-600 border-b-2 border-gray-300' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
             >
-              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               {isRTL ? 'التقارير والتحليلات' : 'Reports and Analytics'}
@@ -639,31 +700,31 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
 
         {/* Revenue Tab Content */}
         {activeTab === 'revenues' && (
-          <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-6">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between mb-4">
+          <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-4 lg:mb-6">
+              <div className="p-4 lg:p-6 border-b border-gray-200">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 gap-4">
                   <h3 
                     className="text-lg font-semibold text-gray-800"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'الإيرادات' : 'Revenues'}
                   </h3>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 lg:gap-3 w-full lg:w-auto">
                     <button 
-                      className="px-4 py-2 bg-[#67AF31] text-white rounded-lg hover:bg-[#5a9629] transition-colors"
+                      className="px-3 lg:px-4 py-2 bg-[#67AF31] text-white rounded-lg hover:bg-[#5a9629] transition-colors text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       + {isRTL ? 'إضافة إيراد' : 'Add Revenue'}
                     </button>
                     <button 
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'استيراد / ويب هوك' : 'Import / Webhook'}
                     </button>
                     <button 
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="px-3 lg:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'تصدير' : 'Export'}
@@ -672,85 +733,85 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4 lg:mb-6">
+                  <div className="bg-green-50 rounded-lg p-3 lg:p-4 border border-green-200">
                     <h4 
-                      className="text-green-600 font-semibold mb-2"
+                      className="text-green-600 font-semibold mb-2 text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'مقبول' : 'Accepted'}
                     </h4>
                     <p 
-                      className="text-green-700 font-bold text-xl"
+                      className="text-green-700 font-bold text-lg lg:text-xl"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       96 KWD
                     </p>
                     <p 
-                      className="text-green-500 text-sm"
+                      className="text-green-500 text-xs lg:text-sm"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       16 {isRTL ? 'عملية' : 'Operations'}
                     </p>
                   </div>
 
-                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="bg-yellow-50 rounded-lg p-3 lg:p-4 border border-yellow-200">
                     <h4 
-                      className="text-yellow-600 font-semibold mb-2"
+                      className="text-yellow-600 font-semibold mb-2 text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'معلق' : 'Pending'}
                     </h4>
                     <p 
-                      className="text-yellow-700 font-bold text-xl"
+                      className="text-yellow-700 font-bold text-lg lg:text-xl"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       139 KWD
                     </p>
                     <p 
-                      className="text-yellow-500 text-sm"
+                      className="text-yellow-500 text-xs lg:text-sm"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       4 {isRTL ? 'عملية' : 'Operations'}
                     </p>
                   </div>
 
-                  <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                  <div className="bg-red-50 rounded-lg p-3 lg:p-4 border border-red-200">
                     <h4 
-                      className="text-red-600 font-semibold mb-2"
+                      className="text-red-600 font-semibold mb-2 text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'مرفوض' : 'Rejected'}
                     </h4>
                     <p 
-                      className="text-red-700 font-bold text-xl"
+                      className="text-red-700 font-bold text-lg lg:text-xl"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       0 KWD
                     </p>
                     <p 
-                      className="text-red-500 text-sm"
+                      className="text-red-500 text-xs lg:text-sm"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       0 {isRTL ? 'عملية' : 'Operations'}
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="bg-blue-50 rounded-lg p-3 lg:p-4 border border-blue-200">
                     <h4 
-                      className="text-blue-600 font-semibold mb-2"
+                      className="text-blue-600 font-semibold mb-2 text-sm lg:text-base"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? 'الإجمالي' : 'Total'}
                     </h4>
                     <p 
-                      className="text-blue-700 font-bold text-xl"
+                      className="text-blue-700 font-bold text-lg lg:text-xl"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       235 KWD
                     </p>
                     <p 
-                      className="text-blue-500 text-sm"
+                      className="text-blue-500 text-xs lg:text-sm"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       20 {isRTL ? 'عملية' : 'Operations'}
@@ -759,8 +820,48 @@ const FinanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChang
                 </div>
               </div>
 
-              {/* Transactions Table */}
-              <div className="overflow-x-auto">
+              {/* Mobile Transactions Cards */}
+              <div className="lg:hidden">
+                <div className="p-4 space-y-3">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-[#67AF31] border-gray-300 rounded focus:ring-[#67AF31]" />
+                          <span className="text-[#67AF31] font-bold text-sm">{transaction.orderId}</span>
+                        </div>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                          {transaction.amount}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isRTL ? 'المتبرع:' : 'Donor:'}</span>
+                          <span className="text-gray-900 font-medium">{isRTL ? transaction.donorName : transaction.donorNameEn}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isRTL ? 'الهاتف:' : 'Phone:'}</span>
+                          <span className="text-gray-900">{transaction.phoneNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isRTL ? 'طريقة الدفع:' : 'Payment:'}</span>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPaymentMethodColor(transaction.paymentMethod)}`}>
+                            {transaction.paymentMethod}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isRTL ? 'التاريخ:' : 'Date:'}</span>
+                          <span className="text-gray-900">{transaction.date} {transaction.time}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop Transactions Table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>

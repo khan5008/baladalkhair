@@ -11,6 +11,8 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [fields, setFields] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleLanguage = () => {
@@ -66,24 +68,34 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar with Green Gradient */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Balad Alkhair Society Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
         {/* Menu Items */}
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`
             nav::-webkit-scrollbar {
               display: none;
@@ -97,6 +109,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -108,18 +121,18 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id 
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -133,12 +146,13 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={() => {
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -149,12 +163,12 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -166,7 +180,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
         </nav>
 
         {/* Footer */}
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -174,31 +188,44 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Back Button */}
+            <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'مخطط جانت' : 'Gantt Master'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">
                 {isRTL ? 'إنشاء حقول مخطط جانت حسب الفئة الفرعية' : 'Create Gantt fields by subcategory'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -208,7 +235,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -216,17 +243,64 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
           <div className="max-w-5xl mx-auto">
             {/* Form Card */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-6">
-              <div className="flex flex-wrap items-center gap-4">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-8 mb-4 lg:mb-6">
+              <div className="space-y-4 lg:space-y-6">
                 {/* Select Subcategory */}
-                <div className="flex-1 min-w-[200px]">
+                <div className="w-full">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     {isRTL ? 'اختر الفئة الفرعية' : 'Select subcategory'}
                   </label>
@@ -251,7 +325,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 </div>
 
                 {/* Select Country */}
-                <div className="flex-1 min-w-[200px]">
+                <div className="w-full">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     {isRTL ? 'اختر البلد' : 'Select country'}
                   </label>
@@ -281,7 +355,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
                     {isRTL ? 'خيارات الدفع' : 'Payment Options'}
                   </label>
-                  <div className="flex flex-wrap gap-6">
+                  <div className="flex flex-col sm:flex-row gap-4 lg:gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
@@ -291,7 +365,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         onChange={(e) => setSelectedOption(e.target.value)}
                         className="w-4 h-4 text-[#67AF31] focus:ring-[#67AF31]"
                       />
-                      <span className="text-gray-700" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}>
+                      <span className="text-gray-700 text-sm lg:text-base" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                         {isRTL ? 'قبل التنفيذ' : 'On Preimplementation'}
                       </span>
                     </label>
@@ -304,7 +378,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         onChange={(e) => setSelectedOption(e.target.value)}
                         className="w-4 h-4 text-[#67AF31] focus:ring-[#67AF31]"
                       />
-                      <span className="text-gray-700" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}>
+                      <span className="text-gray-700 text-sm lg:text-base" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                         {isRTL ? 'عند الدفعة الأولى' : 'On First Payment'}
                       </span>
                     </label>
@@ -317,7 +391,7 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                         onChange={(e) => setSelectedOption(e.target.value)}
                         className="w-4 h-4 text-[#67AF31] focus:ring-[#67AF31]"
                       />
-                      <span className="text-gray-700" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}>
+                      <span className="text-gray-700 text-sm lg:text-base" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                         {isRTL ? 'اختيار الطرف الثالث' : 'Third Party choice'}
                       </span>
                     </label>
@@ -325,17 +399,17 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
                 </div>
 
                 {/* Action Buttons */}
-                <div className="w-full flex gap-4 mt-4">
+                <div className="w-full flex flex-col sm:flex-row gap-3 lg:gap-4 mt-6">
                   <button
                     onClick={handleAddField}
-                    className="px-6 py-3 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                    className="px-4 lg:px-6 py-3 bg-gradient-to-r from-[#67AF31] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm lg:text-base"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'إضافة حقل' : 'Add Field'}
                   </button>
                   <button
-                    className="px-6 py-3 bg-gradient-to-r from-[#7CB342] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
-                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}
+                    className="px-4 lg:px-6 py-3 bg-gradient-to-r from-[#7CB342] to-[#8BC34A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm lg:text-base"
+                    style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? 'حفظ' : 'Save'}
                   </button>
@@ -344,23 +418,23 @@ const GanttMasterScreen = ({ onBack, onNavigate, onLogout, language, onLanguageC
             </div>
 
             {/* Fields List */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
               {fields.length === 0 ? (
-                <p className="text-gray-500 text-center py-8" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}>
+                <p className="text-gray-500 text-center py-6 lg:py-8 text-sm lg:text-base" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                   {isRTL ? 'لم تتم إضافة أي حقول بعد.' : 'No fields added yet.'}
                 </p>
               ) : (
                 <div className="space-y-3">
                   {fields.map((field) => (
-                    <div key={field.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-4">
-                        <span className="text-gray-700 font-medium" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px' }}>
+                    <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 lg:p-4 bg-gray-50 rounded-lg border border-gray-200 gap-3 sm:gap-4">
+                      <div className="flex items-center gap-3 lg:gap-4 flex-1 min-w-0">
+                        <span className="text-gray-700 font-medium text-sm lg:text-base truncate" style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}>
                           {field.subcategory} - {field.country} - {field.option}
                         </span>
                       </div>
                       <button
                         onClick={() => setFields(fields.filter(f => f.id !== field.id))}
-                        className="text-red-500 hover:text-red-700 transition-colors"
+                        className="text-red-500 hover:text-red-700 transition-colors p-1 flex-shrink-0"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
