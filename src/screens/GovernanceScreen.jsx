@@ -4,6 +4,8 @@ import logo from '../assets/logo new.png';
 const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageChange }) => {
   const [activeMenu, setActiveMenu] = useState('governance');
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isRTL = language === 'Arabic';
 
   const toggleMenu = (menuId) => {
@@ -133,22 +135,32 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar */}
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Mobile Responsive */}
       <div 
-        className="w-64 text-white flex flex-col shadow-2xl"
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out lg:transition-none`}
         style={{ 
           background: 'linear-gradient(180deg, #67AF31 0%, #7CB342 50%, #8BC34A 100%)'
         }}
       >
-        <div className="p-6 border-b border-white/20">
+        <div className="p-4 lg:p-6 border-b border-white/20">
           <img 
             src={logo} 
             alt="Logo" 
-            className="h-24 w-auto object-contain mx-auto drop-shadow-lg"
+            className="h-16 lg:h-24 w-auto object-contain mx-auto drop-shadow-lg"
           />
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <nav className="flex-1 overflow-y-auto py-2 lg:py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`nav::-webkit-scrollbar { display: none; }`}</style>
           {menuItems.map((item) => (
             <div key={item.id}>
@@ -158,6 +170,7 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
                     toggleMenu(item.id);
                   } else {
                     setActiveMenu(item.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
                     if (onNavigate) {
                       if (item.id === 'dashboard' && onBack) {
                         onBack();
@@ -177,18 +190,18 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
                     }
                   }
                 }}
-                className={`w-full flex items-center justify-between px-6 py-3.5 transition-all duration-200 mx-2 rounded-xl ${
+                className={`w-full flex items-center justify-between px-4 lg:px-6 py-3 lg:py-3.5 transition-all duration-200 mx-1 lg:mx-2 rounded-lg lg:rounded-xl ${
                   activeMenu === item.id
                     ? 'bg-white text-[#67AF31] shadow-lg' 
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
-                  <span className="font-medium truncate whitespace-nowrap">{isRTL ? item.labelAr : item.label}</span>
+                  <span className="font-medium truncate text-sm lg:text-base">{isRTL ? item.labelAr : item.label}</span>
                 </div>
                 {item.submenu && (
                   <svg 
@@ -202,13 +215,14 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
                 )}
               </button>
               {item.submenu && expandedMenus[item.id] && (
-                <div className="bg-white/10 backdrop-blur-sm mx-2 rounded-lg mt-1">
+                <div className="bg-white/10 backdrop-blur-sm mx-1 lg:mx-2 rounded-lg mt-1">
                   {item.submenu.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenu(subItem.id);
+                        setSidebarOpen(false); // Close sidebar on mobile after selection
                         if (onNavigate) {
                           if (subItem.id === 'finance') {
                             onNavigate('third-party-finance');
@@ -219,12 +233,12 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
                           }
                         }
                       }}
-                      className={`w-full flex items-center px-6 py-2.5 pr-14 transition-all duration-200 rounded-xl ${
+                      className={`w-full flex items-center px-4 lg:px-6 py-2 lg:py-2.5 pr-10 lg:pr-14 transition-all duration-200 rounded-lg lg:rounded-xl ${
                         activeMenu === subItem.id 
                           ? 'bg-white text-[#67AF31] font-semibold shadow-md' 
                           : 'text-white/80 hover:bg-white/5'
                       }`}
-                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '16px', fontWeight: 400 }}
+                      style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '14px', fontWeight: 400 }}
                     >
                       {isRTL ? subItem.labelAr : subItem.label}
                     </button>
@@ -235,7 +249,7 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
           ))}
         </nav>
 
-        <div className="p-6 border-t border-white/20">
+        <div className="p-4 lg:p-6 border-t border-white/20">
           <p className="text-xs text-white/80 text-center font-medium">
             {isRTL ? `جمعية بلد الخير ${new Date().getFullYear()}©` : `Balad Alkhair Society ${new Date().getFullYear()}©`}
           </p>
@@ -243,30 +257,44 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 lg:ml-0">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3 lg:gap-4">
+            {/* Mobile Hamburger Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors lg:hidden"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* Desktop Back Button */}
+            <button onClick={onBack} className="hidden lg:block p-2 hover:bg-gray-100 rounded-xl transition-colors">
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
               <h1 
-                className="text-gray-800 font-bold"
-                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui', fontSize: '24px', fontWeight: 700 }}
+                className="text-gray-800 font-bold text-lg lg:text-2xl"
+                style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'الحوكمة' : 'Governance'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">
                 {isRTL ? 'إدارة المخاطر والامتثال والحوكمة' : 'Risk management, compliance and governance'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Mobile Profile Menu */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Desktop Language & Logout (hidden on mobile) */}
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -276,7 +304,7 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="hidden lg:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -284,29 +312,76 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
                 <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
               </button>
             )}
+            
+            {/* Mobile Profile Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-2 text-gray-600"
+              >
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#67AF31] to-[#8BC34A] rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm lg:text-base">
+                  A
+                </div>
+                <svg className="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Mobile Profile Dropdown */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 lg:hidden">
+                  <button 
+                    onClick={() => {
+                      toggleLanguage();
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2 2 2 0 002-2v-1a2 2 0 012-2h1.945M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{isRTL ? 'English' : 'العربية'}</span>
+                  </button>
+                  {onLogout && (
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">{isRTL ? 'تسجيل الخروج' : 'Logout'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Summary Stats */}
-        <div className="bg-white border-b border-gray-200 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="bg-white border-b border-gray-200 p-4 lg:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
             {summaryStats.map((stat) => (
-              <div key={stat.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div key={stat.id} className="bg-gray-50 rounded-lg p-3 lg:p-4 border border-gray-200">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className={`w-10 h-10 lg:w-12 lg:h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
                   <div>
                     <p 
-                      className="text-gray-600 text-sm font-medium"
+                      className="text-gray-600 text-xs lg:text-sm font-medium"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {isRTL ? stat.labelAr : stat.label}
                     </p>
                     <p 
-                      className="text-gray-700 font-bold text-xl"
+                      className="text-gray-700 font-bold text-lg lg:text-xl"
                       style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                     >
                       {stat.value}
@@ -319,47 +394,47 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
         </div>
 
         {/* Risk Matrix */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 lg:p-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 lg:mb-6 gap-2 lg:gap-4">
               <h2 
-                className="text-xl font-bold text-gray-800"
+                className="text-lg lg:text-xl font-bold text-gray-800"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'مصفوفة المخاطر' : 'Risk Matrix'}
               </h2>
               <p 
-                className="text-sm text-gray-500"
+                className="text-xs lg:text-sm text-gray-500"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'توزيع المخاطر عبر الفئات ومستويات التأثير' : 'Risk distribution across categories and impact levels'}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
               {riskCategories.map((category) => (
-                <div key={category.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div key={category.id} className="bg-gray-50 rounded-lg p-3 lg:p-4 border border-gray-200">
                   <h3 
-                    className="text-lg font-semibold text-gray-800 mb-4"
+                    className="text-base lg:text-lg font-semibold text-gray-800 mb-3 lg:mb-4"
                     style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                   >
                     {isRTL ? category.titleAr : category.title}
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-2 lg:space-y-3">
                     {category.risks.map((risk, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-3">
+                      <div key={index} className="flex items-center justify-between p-2 lg:p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 lg:gap-3">
                           <div className={`w-3 h-3 ${risk.color} rounded-full`}></div>
                           <span 
-                            className="text-sm font-medium text-gray-700"
+                            className="text-xs lg:text-sm font-medium text-gray-700"
                             style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? risk.levelAr : risk.level}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 lg:gap-2">
                           <span 
-                            className="text-sm text-gray-500"
+                            className="text-xs lg:text-sm text-gray-500 hidden sm:inline"
                             style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                           >
                             {isRTL ? 'لا توجد مخاطر' : 'No risks'}
@@ -376,14 +451,14 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
             </div>
 
             {/* Legend */}
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="mt-6 lg:mt-8 p-3 lg:p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 
-                className="text-sm font-semibold text-gray-700 mb-3"
+                className="text-sm font-semibold text-gray-700 mb-2 lg:mb-3"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'إضافة فئات المخاطر' : 'auditing.riskCategories'}
               </h4>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-2 lg:gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <span 
@@ -433,19 +508,19 @@ const GovernanceScreen = ({ onBack, onNavigate, onLogout, language, onLanguageCh
             </div>
 
             {/* Recent Items */}
-            <div className="mt-8">
+            <div className="mt-6 lg:mt-8">
               <h4 
-                className="text-lg font-semibold text-gray-800 mb-4"
+                className="text-base lg:text-lg font-semibold text-gray-800 mb-3 lg:mb-4"
                 style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
               >
                 {isRTL ? 'العناصر الحديثة' : 'Recent Items'}
               </h4>
-              <div className="bg-gray-50 rounded-lg p-8 text-center border border-gray-200">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gray-50 rounded-lg p-6 lg:p-8 text-center border border-gray-200">
+                <svg className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p 
-                  className="text-gray-500 text-lg"
+                  className="text-gray-500 text-base lg:text-lg"
                   style={{ fontFamily: 'Tajawal, ui-sans-serif, system-ui' }}
                 >
                   {isRTL ? 'لا توجد قضايا حديثة' : 'No recent issues'}
